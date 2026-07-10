@@ -3,14 +3,18 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import {
+  addDays,
   addMonths,
   eachDayOfInterval,
   endOfMonth,
   endOfWeek,
   format,
+  isAfter,
+  isBefore,
   isSameDay,
   isSameMonth,
   startOfMonth,
+  startOfToday,
   startOfWeek,
 } from "date-fns";
 import { th } from "date-fns/locale";
@@ -51,9 +55,11 @@ const seedData: AvailabilityRecord[] = [
 ];
 
 export default function Home() {
+  const today = useMemo(() => startOfToday(), []);
   const [currentMonth, setCurrentMonth] = useState(() => startOfMonth(new Date()));
   const [selectedDate, setSelectedDate] = useState(() => new Date());
   const [view, setView] = useState<"calendar" | "team">("calendar");
+  const [previousView, setPreviousView] = useState<"calendar" | "team" | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [memberProfiles, setMemberProfiles] = useState<MemberProfile[]>(
     demoMembers.map((name) => ({ id: name, name, avatarUrl: null })),
@@ -136,6 +142,8 @@ export default function Home() {
     return eachDayOfInterval({ start, end });
   }, [currentMonth]);
 
+  const visibleDays = useMemo(() => days.filter((day) => !isBefore(day, today)), [days, today]);
+
   const getDayRecords = (day: Date) => {
     const key = format(day, "yyyy-MM-dd");
     return members.map((member) => records.find((record) => record.date === key && record.member === member) ?? null);
@@ -143,7 +151,7 @@ export default function Home() {
 
   const bestDays = useMemo(() => {
     const totalMembers = members.length;
-    return days
+    const ranked = visibleDays
       .map((day) => {
         const key = format(day, "yyyy-MM-dd");
         const dayRecords = records.filter((record) => record.date === key);
@@ -152,10 +160,15 @@ export default function Home() {
         const unresolved = Math.max(totalMembers - dayRecords.length, 0);
         return { day, key, available, busy, unresolved, score: available - busy - unresolved };
       })
-      .filter((item) => item.available > 0)
-      .sort((left, right) => right.score - left.score || right.available - left.available || left.unresolved - right.unresolved)
-      .slice(0, 5);
-  }, [days, members.length, records]);
+      .filter((item) => item.available > 0 && item.busy === 0)
+      .sort((left, right) => {
+        if (right.score !== left.score) return right.score - left.score;
+        if (right.available !== left.available) return right.available - left.available;
+        if (left.unresolved !== right.unresolved) return left.unresolved - right.unresolved;
+        return left.day.getTime() - right.day.getTime();
+      });
+    return ranked.slice().sort((left, right) => left.day.getTime() - right.day.getTime()).slice(0, 5);
+  }, [members.length, records, visibleDays]);
 
   const selectedRecords = getDayRecords(selectedDate);
   const availableCount = selectedRecords.filter((record) => record?.status === "available").length;
@@ -261,8 +274,8 @@ export default function Home() {
               </span>
             </a>
             <nav aria-label="เมนูหลัก" className="flex items-center gap-1 border border-[#d8d4c8] bg-white p-1">
-              <button onClick={() => setView("calendar")} className={`min-h-10 cursor-pointer px-4 text-sm font-medium transition-colors ${view === "calendar" ? "bg-[#24231f] text-white" : "hover:bg-[#f2f0e9]"}`}>ปฏิทิน</button>
-              <button onClick={() => setView("team")} className={`min-h-10 cursor-pointer px-4 text-sm font-medium transition-colors ${view === "team" ? "bg-[#24231f] text-white" : "hover:bg-[#f2f0e9]"}`}>ภาพรวมทีม</button>
+              <button onClick={() => { setPreviousView(view); setView("calendar"); }} className={`min-h-10 cursor-pointer px-4 text-sm font-medium transition-colors ${view === "calendar" ? "bg-[#24231f] text-white" : "hover:bg-[#f2f0e9]"}`}>ปฏิทิน</button>
+              <button onClick={() => { setPreviousView(view); setView("team"); }} className={`min-h-10 cursor-pointer px-4 text-sm font-medium transition-colors ${view === "team" ? "bg-[#24231f] text-white" : "hover:bg-[#f2f0e9]"}`}>ภาพรวมทีม</button>
             </nav>
             <div className="hidden items-center gap-2 sm:flex">
               <label title="เปลี่ยนรูปโปรไฟล์" className="relative grid size-11 cursor-pointer place-items-center overflow-hidden rounded-full border border-[#d8d4c8] bg-[#e7e2d6] hover:border-[#245c4a]">
@@ -277,8 +290,8 @@ export default function Home() {
           </div>
         </header>
 
-        <section id="content" className="grid lg:grid-cols-[minmax(0,1fr)_330px]">
-          <div className="min-w-0 px-5 py-8 sm:px-8 lg:border-r lg:border-[#d8d4c8] lg:px-12 lg:py-10">
+        <section id="content" className={`grid ${view === "calendar" ? "lg:grid-cols-[minmax(0,1fr)_330px]" : "grid-cols-1"}`}>
+          <div className={`min-w-0 px-5 py-8 sm:px-8 lg:px-12 lg:py-10 ${view === "calendar" ? "lg:border-r lg:border-[#d8d4c8]" : ""}`}>
             <div className="mb-8 flex flex-col justify-between gap-5 md:flex-row md:items-end">
               <div>
                 <p className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#6e6a60]">
@@ -297,12 +310,12 @@ export default function Home() {
             </div>
 
             {view === "calendar" ? (
-              <section aria-label="ปฏิทินประจำเดือน" className="border border-[#cbc7bb] bg-white">
+              <section aria-label="ปฏิทินประจำเดือน" className="motion-safe:animate-[fade-in-up_220ms_ease-out] border border-[#cbc7bb] bg-white">
                 <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#d8d4c8] px-4 py-4 sm:px-6">
                   <div className="grid gap-2 rounded-none border border-[#d8d4c8] bg-[#f8f6f0] px-4 py-3">
                     <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#777267]">วันที่คนพร้อมมากสุด</p>
                     <div className="flex flex-wrap gap-2">
-                      {bestDays.map(({ key }) => <button key={key} onClick={() => setSelectedDate(new Date(key))} className="min-h-9 rounded-none border border-[#245c4a] bg-[#dcecdf] px-3 text-xs font-semibold text-[#194638] shadow-[2px_2px_0_#245c4a]">{format(new Date(key), "d MMM", { locale: th })}</button>)}
+                      {bestDays.map(({ day, key }) => <button key={key} onClick={() => setSelectedDate(day)} className="min-h-9 rounded-none border border-[#245c4a] bg-[#dcecdf] px-3 text-xs font-semibold text-[#194638] shadow-[2px_2px_0_#245c4a]">{format(day, "d MMM", { locale: th })}</button>)}
                     </div>
                   </div>
                   <div>
@@ -312,7 +325,7 @@ export default function Home() {
                   <div className="flex flex-wrap items-center gap-1">
                     <button onClick={() => { setIsMultiSelect((value) => !value); setSelectedDates([]); }} className={`min-h-11 cursor-pointer border px-3 text-sm font-medium ${isMultiSelect ? "border-[#245c4a] bg-[#dcecdf] text-[#194638]" : "border-[#d8d4c8] hover:bg-[#f2f0e9]"}`}>{isMultiSelect ? "ยกเลิกเลือกหลายวัน" : "เลือกหลายวัน"}</button>
                     <button onClick={() => setCurrentMonth(addMonths(currentMonth, -1))} aria-label="เดือนก่อนหน้า" className="grid size-11 cursor-pointer place-items-center border border-[#d8d4c8] hover:bg-[#f2f0e9]"><ChevronLeft className="size-4" /></button>
-                    <button onClick={() => { const today = new Date(); setCurrentMonth(startOfMonth(today)); setSelectedDate(today); }} className="min-h-11 cursor-pointer border-y border-[#d8d4c8] px-4 text-sm font-medium hover:bg-[#f2f0e9]">วันนี้</button>
+                    <button onClick={() => { const start = startOfToday(); setCurrentMonth(startOfMonth(start)); setSelectedDate(start); }} className="min-h-11 cursor-pointer border-y border-[#d8d4c8] px-4 text-sm font-medium hover:bg-[#f2f0e9]">วันนี้</button>
                     <button onClick={() => setCurrentMonth(addMonths(currentMonth, 1))} aria-label="เดือนถัดไป" className="grid size-11 cursor-pointer place-items-center border border-[#d8d4c8] hover:bg-[#f2f0e9]"><ChevronRight className="size-4" /></button>
                   </div>
                 </div>
@@ -329,12 +342,12 @@ export default function Home() {
                     const selected = isSameDay(day, selectedDate);
                     return (
                       <button key={key} onClick={() => { if (isMultiSelect) setSelectedDates((dates) => dates.includes(key) ? dates.filter((date) => date !== key) : [...dates, key]); else setSelectedDate(day); }} onDoubleClick={() => !isMultiSelect && openEditor(day)} aria-pressed={isMultiSelect ? selectedDates.includes(key) : undefined} aria-label={`${format(day, "d MMMM", { locale: th })}, ${available} คนว่าง`} className={`group relative min-h-[84px] cursor-pointer border-b border-r border-[#e2dfd6] p-2 text-left transition-colors sm:min-h-[118px] sm:p-3 ${!isSameMonth(day, currentMonth) ? "bg-[#f8f6f0] text-[#aaa59a]" : "hover:bg-[#f6f3e9]"} ${selected || selectedDates.includes(key) ? "inset-ring-2 inset-ring-[#245c4a]" : ""}`}>
+                        {isSameDay(day, today) && <span aria-label="วันนี้" className="absolute right-0 top-0 size-0 border-l-[13px] border-t-[13px] border-l-transparent border-t-[#245c4a]" />}
                         <div className="flex items-start justify-between">
-                          <span className={`grid size-7 place-items-center text-sm font-medium ${isSameDay(day, new Date()) ? "bg-[#24231f] text-white" : ""}`}>{format(day, "d")}</span>
-                          {allAvailable && <span title="ทุกคนว่าง" className="grid size-6 place-items-center rounded-full bg-[#dcecdf] text-[#245c4a]"><Check className="size-3.5" strokeWidth={2.5} /></span>}
+                          <span className="grid size-7 place-items-center text-sm font-medium">{format(day, "d")}</span>
                         </div>
                         <div className="mt-3 hidden items-center -space-x-1 sm:flex">
-                          {responded.slice(0, 5).map((record) => record && <span title={`${record.member}: ${record.status === "available" ? "ว่าง" : "ไม่ว่าง"}`} key={record.member} className={`grid size-6 place-items-center rounded-full border-2 border-white text-[8px] font-bold ${record.status === "available" ? "bg-[#dcecdf] text-[#245c4a]" : "bg-[#eee1dc] text-[#914b3a]"}`}>{initials[record.member]}</span>)}
+                          {responded.slice(0, 5).map((record) => record && <span title={`${record.member}: ${record.status === "available" ? "ว่าง" : "ไม่ว่าง"}`} key={record.member} className={`size-6 rounded-full border-2 border-white ${record.status === "available" ? "bg-[#dcecdf]" : "bg-[#eee1dc]"}`} />)}
                         </div>
                         <p className="mt-2 text-[10px] text-[#777267] sm:text-xs">{responded.length ? `${available}/${members.length} ว่าง` : "ยังไม่มีข้อมูล"}</p>
                       </button>
@@ -347,38 +360,40 @@ export default function Home() {
             )}
           </div>
 
-          <aside className="border-t border-[#d8d4c8] bg-[#f8f6f0] px-5 py-8 sm:px-8 lg:border-t-0 lg:px-7 lg:py-10">
-            <div className="lg:sticky lg:top-6">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#777267]">วันที่เลือก</p>
-              <h2 className="mt-2 text-2xl font-semibold tracking-[-0.035em]">{format(selectedDate, "d MMMM", { locale: th })}</h2>
-              <p className="text-sm text-[#777267]">{format(selectedDate, "EEEE yyyy", { locale: th })}</p>
+          {view === "calendar" && (
+            <aside className="border-t border-[#d8d4c8] bg-[#f8f6f0] px-5 py-8 sm:px-8 lg:border-t-0 lg:px-7 lg:py-10">
+              <div className="lg:sticky lg:top-6">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#777267]">วันที่เลือก</p>
+                <h2 className="mt-2 text-2xl font-semibold tracking-[-0.035em]">{format(selectedDate, "d MMMM", { locale: th })}</h2>
+                <p className="text-sm text-[#777267]">{format(selectedDate, "EEEE yyyy", { locale: th })}</p>
 
-              <div className="my-6 grid grid-cols-2 border border-[#d8d4c8] bg-white">
-                <div className="border-r border-[#d8d4c8] p-4"><strong className="block text-2xl">{availableCount}</strong><span className="text-xs text-[#777267]">ว่าง</span></div>
-                <div className="p-4"><strong className="block text-2xl">{responseCount}</strong><span className="text-xs text-[#777267]">ตอบแล้ว</span></div>
-              </div>
+                <div className="my-6 grid grid-cols-2 border border-[#d8d4c8] bg-white">
+                  <div className="border-r border-[#d8d4c8] p-4"><strong className="block text-2xl">{availableCount}</strong><span className="text-xs text-[#777267]">ว่าง</span></div>
+                  <div className="p-4"><strong className="block text-2xl">{responseCount}</strong><span className="text-xs text-[#777267]">ตอบแล้ว</span></div>
+                </div>
 
-              <label className="relative mb-3 block">
-                <span className="sr-only">ค้นหาสมาชิก</span>
-                <Search className="pointer-events-none absolute left-3 top-3 size-4 text-[#777267]" />
-                <input value={memberQuery} onChange={(event) => setMemberQuery(event.target.value)} placeholder="ค้นหาสมาชิก" className="min-h-10 w-full border border-[#d8d4c8] bg-white pl-9 pr-3 text-sm outline-none focus:border-[#245c4a]" />
-              </label>
-              <div className="max-h-[520px] space-y-2 overflow-y-auto">
-                {visibleMembers.map((member) => {
-                  const record = selectedRecords.find((item) => item?.member === member);
-                  const profile = memberProfiles.find((item) => item.name === member);
-                  return (
-                    <div key={member} className="flex min-h-14 w-full items-center gap-3 border-b border-[#dedbd2] px-1 text-left">
-                      <Avatar profile={profile} />
-                      <span className="min-w-0 flex-1"><span className="block text-sm font-medium">{member}</span><span className="block truncate text-xs text-[#777267]">{record?.reason || (record ? "ไม่มีเหตุผลเพิ่มเติม" : "ยังไม่ตอบ")}</span></span>
-                      <span className={`size-2.5 rounded-full ${record?.status === "available" ? "bg-[#4f8b6f]" : record?.status === "busy" ? "bg-[#a65d4d]" : "border border-[#aaa59a]"}`} />
-                    </div>
-                  );
-                })}
+                <label className="relative mb-3 block">
+                  <span className="sr-only">ค้นหาสมาชิก</span>
+                  <Search className="pointer-events-none absolute left-3 top-3 size-4 text-[#777267]" />
+                  <input value={memberQuery} onChange={(event) => setMemberQuery(event.target.value)} placeholder="ค้นหาสมาชิก" className="min-h-10 w-full border border-[#d8d4c8] bg-white pl-9 pr-3 text-sm outline-none focus:border-[#245c4a]" />
+                </label>
+                <div className="max-h-[520px] space-y-2 overflow-y-auto">
+                  {visibleMembers.map((member) => {
+                    const record = selectedRecords.find((item) => item?.member === member);
+                    const profile = profileMap[member];
+                    return (
+                      <div key={member} className="flex min-h-14 w-full items-center gap-3 border-b border-[#dedbd2] px-1 text-left">
+                        <Avatar profile={profile} />
+                        <span className="min-w-0 flex-1"><span className="block text-sm font-medium">{member}</span><span className="block truncate text-xs text-[#777267]">{record?.reason || (record ? "ไม่มีเหตุผลเพิ่มเติม" : "ยังไม่ตอบ")}</span></span>
+                        <span className={`size-2.5 rounded-full ${record?.status === "available" ? "bg-[#4f8b6f]" : record?.status === "busy" ? "bg-[#a65d4a]" : "border border-[#aaa59a]"}`} />
+                      </div>
+                    );
+                  })}
+                </div>
+                <button onClick={() => openEditor(selectedDate)} disabled={isDataLoading} className="mt-6 flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 border border-[#24231f] bg-white text-sm font-semibold hover:bg-[#24231f] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"><PencilLine className="size-4" /> แก้ไขสถานะของฉัน</button>
               </div>
-              <button onClick={() => openEditor(selectedDate)} disabled={isDataLoading} className="mt-6 flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 border border-[#24231f] bg-white text-sm font-semibold hover:bg-[#24231f] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"><PencilLine className="size-4" /> แก้ไขสถานะของฉัน</button>
-            </div>
-          </aside>
+            </aside>
+          )}
         </section>
       </div>
 
@@ -483,15 +498,49 @@ function Avatar({ profile, size = "small" }: { profile?: MemberProfile; size?: "
   return <span aria-hidden="true" className={`grid ${classes} place-items-center rounded-full bg-[#dcecdf] font-bold text-[#194638]`}>{fallback}</span>;
 }
 
-function TeamGrid({ currentMonth, members, profiles, records, onSelect }: { currentMonth: Date; members: string[]; profiles: MemberProfile[]; records: AvailabilityRecord[]; onSelect: (day: Date) => void }) {
-  const days = eachDayOfInterval({ start: startOfMonth(currentMonth), end: endOfMonth(currentMonth) }).slice(0, 14);
+function ReportDates({ title, description, days, tone }: { title: string; description: string; days: { day: Date; key: string }[]; tone: "available" | "partial" | "busy" }) {
+  const toneClass = tone === "available" ? "border-[#83a894] bg-[#eef6f1]" : tone === "busy" ? "border-[#bd9085] bg-[#f4ece7]" : "border-[#c9b982] bg-[#f6f1df]";
   return (
-    <section className="border border-[#cbc7bb] bg-white">
-      <div className="border-b border-[#d8d4c8] p-5 sm:p-6"><p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#777267]">Team overview</p><h2 className="mt-1 text-2xl font-semibold tracking-[-0.035em]">ภาพรวม 14 วัน</h2><p className="mt-1 text-sm text-[#777267]">สีเขียวคือว่าง สีอิฐคือไม่ว่าง และจุดโปร่งคือยังไม่ตอบ</p></div>
+    <div className={`min-h-28 border p-4 ${toneClass}`}>
+      <h3 className="text-sm font-semibold">{title}</h3>
+      <p className="mt-1 text-xs text-[#777267]">{description}</p>
+      <div className="mt-3 flex flex-wrap gap-1.5">
+        {days.length ? days.map(({ day, key }) => <span key={key} className="border border-current/20 bg-white/60 px-2 py-1 text-xs font-medium">{format(day, "d MMM", { locale: th })}</span>) : <span className="text-xs text-[#777267]">ยังไม่มีวันที่ตรงเงื่อนไข</span>}
+      </div>
+    </div>
+  );
+}
+
+function TeamGrid({ currentMonth, members, profiles, records, onSelect }: { currentMonth: Date; members: string[]; profiles: MemberProfile[]; records: AvailabilityRecord[]; onSelect: (day: Date) => void }) {
+  const today = startOfToday();
+  const days = eachDayOfInterval({ start: today, end: addDays(today, 13) });
+  const summary = useMemo(() => days.map((day) => {
+    const key = format(day, "yyyy-MM-dd");
+    const dayRecords = records.filter((record) => record.date === key);
+    const available = dayRecords.filter((record) => record.status === "available").length;
+    const busy = dayRecords.filter((record) => record.status === "busy").length;
+    const complete = dayRecords.length === members.length && members.length > 0;
+    return { day, key, available, busy, complete };
+  }), [days, members.length, records]);
+  const allAvailableDays = summary.filter((item) => item.complete && item.available === members.length);
+  const partialDays = summary.filter((item) => item.available > 0 && item.available < members.length);
+  const allBusyDays = summary.filter((item) => item.complete && item.busy === members.length);
+  return (
+    <section className="border border-[#cbc7bb] bg-white motion-safe:animate-[fade-in-up_220ms_ease-out]">
+      <div className="border-b border-[#d8d4c8] p-5 sm:p-6">
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#777267]">Report</p>
+        <h2 className="mt-1 text-2xl font-semibold tracking-[-0.035em]">14 วันข้างหน้า</h2>
+        <p className="mt-1 text-sm text-[#777267]">ภาพรวมสถานะของทีมแบบเรียบและอ่านไว</p>
+        <div className="mt-5 grid gap-3 lg:grid-cols-3">
+          <ReportDates title="ว่างตรงกันทุกคน" description="ทุกคนตอบว่าว่าง 100%" days={allAvailableDays} tone="available" />
+          <ReportDates title="ว่างบางคน" description="มีอย่างน้อยหนึ่งคนว่าง" days={partialDays} tone="partial" />
+          <ReportDates title="ไม่ว่างทั้งทีม" description="ทุกคนตอบว่าไม่ว่าง 100%" days={allBusyDays} tone="busy" />
+        </div>
+      </div>
       <div className="overflow-x-auto">
         <div className="min-w-[820px]">
           <div className="grid grid-cols-[150px_repeat(14,1fr)] border-b border-[#d8d4c8] bg-[#f8f6f0]"><div className="p-3 text-xs font-semibold text-[#777267]">สมาชิก</div>{days.map((day) => <button onClick={() => onSelect(day)} key={day.toISOString()} className="cursor-pointer border-l border-[#e2dfd6] p-2 text-center hover:bg-[#eeeae0]"><span className="block text-[10px] text-[#777267]">{format(day, "EEE")}</span><strong className="text-sm">{format(day, "d")}</strong></button>)}</div>
-          {members.map((member) => <div key={member} className="grid grid-cols-[150px_repeat(14,1fr)] border-b border-[#e2dfd6]"><div className="flex items-center gap-2 p-3 text-sm font-medium"><Avatar profile={profiles.find((item) => item.name === member)} />{member}</div>{days.map((day) => { const record = records.find((item) => item.member === member && item.date === format(day, "yyyy-MM-dd")); return <button title={record?.reason || "ยังไม่ตอบ"} onClick={() => onSelect(day)} key={day.toISOString()} className="grid min-h-14 cursor-pointer place-items-center border-l border-[#e2dfd6] hover:bg-[#f2f0e9]"><span className={`size-5 rounded-full ${record?.status === "available" ? "bg-[#4f8b6f]" : record?.status === "busy" ? "bg-[#a65d4d]" : "border border-[#aaa59a]"}`} /></button>; })}</div>)}
+          {members.map((member) => <div key={member} className="grid grid-cols-[150px_repeat(14,1fr)] border-b border-[#e2dfd6]"><div className="flex items-center gap-2 p-3 text-sm font-medium"><Avatar profile={profiles.find((item) => item.name === member)} />{member}</div>{days.map((day) => { const record = records.find((item) => item.member === member && item.date === format(day, "yyyy-MM-dd")); return <button title={record?.reason || "ยังไม่ตอบ"} onClick={() => onSelect(day)} key={day.toISOString()} className={`grid min-h-14 cursor-pointer place-items-center border-l border-[#e2dfd6] ${record?.status === "available" ? "bg-[#eef6f1] hover:bg-[#e1efe8]" : record?.status === "busy" ? "bg-[#f4ece7] hover:bg-[#edded5]" : "bg-white hover:bg-[#f7f5ef]"}`}></button>; })}</div>)}
         </div>
       </div>
     </section>
