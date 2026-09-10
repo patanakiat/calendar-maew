@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Calendar Maew helps teams see availability, coordinate plans, and find the best day to meet.">
+  <title>Calendar Maew — Make time work for every team</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #172033;
+      --muted: #697386;
+      --line: #e5eaf1;
+      --surface: #ffffff;
+      --canvas: #f7f9fc;
+      --blue: #2351d8;
+      --blue-dark: #173da9;
+      --mint: #dff6e9;
+      --mint-ink: #197047;
+      --lavender: #eef0ff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      color: var(--ink);
+      background: var(--canvas);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .shell { width: min(1120px, calc(100% - 40px)); margin: 0 auto; }
+
+    .site-header { padding: 25px 0; }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .brand { display: inline-flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 750; letter-spacing: -0.03em; }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 9px;
+      color: white;
+      background: var(--blue);
+      font-size: 17px;
+      line-height: 1;
+    }
+
+    .nav-link { color: var(--muted); font-size: 14px; font-weight: 600; }
+    .nav-link:hover { color: var(--blue); }
+
+    .hero { padding: 78px 0 104px; text-align: center; }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 11px;
+      border: 1px solid #cdd8ff;
+      border-radius: 999px;
+      color: #3154b9;
+      background: var(--lavender);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .eyebrow::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #5475e8; }
+
+    h1 { max-width: 780px; margin: 22px auto 20px; font-size: clamp(43px, 6vw, 72px); line-height: 1.03; letter-spacing: -0.06em; }
+
+    .hero-copy { max-width: 600px; margin: 0 auto; color: var(--muted); font-size: 18px; line-height: 1.65; }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      margin-top: 31px;
+      padding: 0 21px;
+      border-radius: 10px;
+      color: #fff;
+      background: var(--blue);
+      box-shadow: 0 9px 20px rgba(35, 81, 216, .2);
+      font-size: 15px;
+      font-weight: 750;
+      transition: background .18s ease, transform .18s ease;
+    }
+
+    .button:hover { background: var(--blue-dark); transform: translateY(-1px); }
+    .button:focus-visible, .nav-link:focus-visible { outline: 3px solid #9bb1fa; outline-offset: 4px; }
+
+    .calendar-preview {
+      max-width: 790px;
+      margin: 70px auto 0;
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: var(--surface);
+      box-shadow: 0 24px 50px rgba(27, 48, 91, .08);
+      text-align: left;
+    }
+
+    .calendar-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 19px; }
+    .calendar-title { font-size: 16px; font-weight: 750; }
+    .team { display: inline-flex; align-items: center; gap: 7px; color: var(--muted); font-size: 13px; font-weight: 600; }
+    .avatars { display: flex; padding-left: 5px; }
+    .avatar { display: grid; place-items: center; width: 24px; height: 24px; margin-left: -5px; border: 2px solid white; border-radius: 50%; color: white; background: #7890d8; font-size: 9px; font-weight: 800; }
+    .avatar:nth-child(2) { background: #e28e7d; }
+    .avatar:nth-child(3) { background: #6dba9b; }
+
+    .calendar { overflow: hidden; border: 1px solid var(--line); border-radius: 12px; }
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); }
+    .weekday { padding: 11px 4px; color: #8b94a4; background: #fbfcfe; border-bottom: 1px solid var(--line); text-align: center; font-size: 11px; font-weight: 750; }
+    .day { position: relative; min-height: 69px; padding: 9px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); color: #4f5b6d; font-size: 13px; font-weight: 650; }
+    .day:nth-child(7n) { border-right: 0; }
+    .day.free { background: #f3fbf7; color: var(--mint-ink); }
+    .day.selected { color: var(--blue); background: #f1f4ff; }
+    .day .dot { position: absolute; right: 9px; bottom: 10px; width: 7px; height: 7px; border-radius: 50%; background: #aeb7c6; }
+    .day.free .dot { background: #38a66e; }
+    .day.selected .dot { background: var(--blue); }
+
+    .features { padding: 88px 0 108px; background: var(--surface); }
+    .section-heading { max-width: 540px; margin: 0 auto 44px; text-align: center; }
+    h2 { margin: 0 0 12px; font-size: clamp(30px, 4vw, 42px); line-height: 1.15; letter-spacing: -0.045em; }
+    .section-heading p { margin: 0; color: var(--muted); font-size: 17px; line-height: 1.6; }
+
+    .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .feature { padding: 27px; border: 1px solid var(--line); border-radius: 15px; background: #fff; }
+    .icon { display: grid; place-items: center; width: 40px; height: 40px; margin-bottom: 20px; border-radius: 11px; color: var(--blue); background: var(--lavender); font-size: 20px; }
+    .feature:nth-child(2) .icon { color: var(--mint-ink); background: var(--mint); }
+    .feature:nth-child(3) .icon { color: #8558bc; background: #f5edff; }
+    h3 { margin: 0 0 10px; font-size: 17px; letter-spacing: -0.025em; }
+    .feature p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.65; }
+
+    footer { padding: 27px 0; border-top: 1px solid var(--line); color: #8b94a4; background: var(--surface); font-size: 13px; }
+
+    @media (max-width: 680px) {
+      .shell { width: min(100% - 32px, 1120px); }
+      .site-header { padding: 18px 0; }
+      .hero { padding: 56px 0 72px; }
+      .calendar-preview { margin-top: 50px; padding: 12px; }
+      .day { min-height: 52px; padding: 7px; }
+      .day .dot { right: 7px; bottom: 7px; }
+      .features { padding: 67px 0 76px; }
+      .feature-grid { grid-template-columns: 1fr; gap: 14px; }
+      .feature { padding: 22px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="shell nav">
+      <a class="brand" href="/" aria-label="Calendar Maew home"><span class="brand-mark" aria-hidden="true">✦</span>Calendar Maew</a>
+      <a class="nav-link" href="/">Open app →</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero shell">
+      <span class="eyebrow">Availability, aligned</span>
+      <h1>Make time work for every team.</h1>
+      <p class="hero-copy">Calendar Maew gives your team one clear view of availability, so finding the right day to meet takes minutes—not message threads.</p>
+      <a class="button" href="/">Start coordinating <span aria-hidden="true">&nbsp;→</span></a>
+
+      <div class="calendar-preview" aria-label="An example team availability calendar">
+        <div class="calendar-top">
+          <span class="calendar-title">October 2026</span>
+          <span class="team"><span class="avatars" aria-hidden="true"><span class="avatar">A</span><span class="avatar">J</span><span class="avatar">M</span></span> Product team</span>
+        </div>
+        <div class="calendar">
+          <div class="calendar-grid" aria-hidden="true">
+            <span class="weekday">MON</span><span class="weekday">TUE</span><span class="weekday">WED</span><span class="weekday">THU</span><span class="weekday">FRI</span><span class="weekday">SAT</span><span class="weekday">SUN</span>
+            <span class="day">28</span><span class="day">29</span><span class="day">30</span><span class="day">1<span class="dot"></span></span><span class="day free">2<span class="dot"></span></span><span class="day">3</span><span class="day">4</span>
+            <span class="day">5<span class="dot"></span></span><span class="day free">6<span class="dot"></span></span><span class="day selected">7<span class="dot"></span></span><span class="day free">8<span class="dot"></span></span><span class="day">9<span class="dot"></span></span><span class="day">10</span><span class="day">11</span>
+            <span class="day">12</span><span class="day">13<span class="dot"></span></span><span class="day free">14<span class="dot"></span></span><span class="day free">15<span class="dot"></span></span><span class="day">16</span><span class="day">17</span><span class="day">18</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="features">
+      <div class="shell">
+        <div class="section-heading">
+          <h2>Plans begin with clarity.</h2>
+          <p>Give everyone an easy way to share their schedule, then make decisions with confidence.</p>
+        </div>
+        <div class="feature-grid">
+          <article class="feature">
+            <div class="icon" aria-hidden="true">◷</div>
+            <h3>Share your availability</h3>
+            <p>Mark dates as available or unavailable, and add the context teammates need to plan around your time.</p>
+          </article>
+          <article class="feature">
+            <div class="icon" aria-hidden="true">▦</div>
+            <h3>See the whole team</h3>
+            <p>Bring every schedule into one simple overview and replace scattered updates with a shared source of truth.</p>
+          </article>
+          <article class="feature">
+            <div class="icon" aria-hidden="true">✦</div>
+            <h3>Find the best day</h3>
+            <p>Spot the dates when everyone is available at a glance, so organizing meetings and events feels effortless.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="shell">© 2026 Calendar Maew. Clear calendars, better plans.</div>
+  </footer>
+</body>
+</html>
