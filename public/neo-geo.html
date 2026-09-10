@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#eeeae1">
+  <meta name="description" content="INTERVAL turns the unused hours in existing buildings into a neighborhood space commons. More room for life. No new buildings.">
+  <title>INTERVAL — More room. Same city.</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%23e34a28' d='M3 3h7v26H3zm10 9h7v17h-7zm10 8h7v9h-7z'/%3E%3C/svg%3E">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=Space+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+    :root{--paper:#eeeae1;--ink:#232720;--muted:#616359;--line:#c7c7bb;--orange:#e34a28;--sage:#b5bfa7;--white:#f8f5ee;--mono:'IBM Plex Mono',monospace;--sans:'Space Grotesk',sans-serif}
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth;scroll-padding-top:94px}
+    body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+    ::selection{background:var(--orange);color:var(--white)}
+    a{color:inherit;text-decoration:none}
+    button,input,select{font:inherit}
+    button,a,input,select{-webkit-tap-highlight-color:transparent}
+    button{cursor:pointer}
+    button:disabled{cursor:default}
+    a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--orange);outline-offset:5px}
+    .skip{position:fixed;top:-100px;left:24px;z-index:100;background:var(--ink);color:var(--white);padding:15px}
+    .skip:focus{top:10px}
+    .wrap{width:calc(100% - 112px);max-width:1440px;margin:auto}
+    .mono{font:400 11px/1.5 var(--mono);letter-spacing:.06em;text-transform:uppercase}
+    .site-header{position:sticky;top:0;z-index:20;background:var(--paper);border-bottom:1px solid var(--line)}
+    .header-inner{height:83px;display:flex;align-items:center;justify-content:space-between;gap:32px}
+    .brand{display:inline-flex;align-items:center;gap:12px;font-size:27px;letter-spacing:-1.5px;font-weight:700}
+    .brand-mark{display:flex;gap:3px;width:24px;height:25px}
+    .brand-mark i{display:block;width:6px;background:var(--ink)}
+    .brand-mark i:nth-child(2){height:16px;align-self:flex-end}
+    .brand-mark i:nth-child(3){height:9px;align-self:flex-end}
+    .header-caption{margin-right:auto;margin-left:39px;max-width:135px;font-size:9px;line-height:1.5}
+    nav{display:flex;gap:32px;align-items:center;font-size:12px}
+    nav>a:not(.nav-cta){position:relative;padding:12px 0}
+    nav>a:not(.nav-cta)::after{content:'';position:absolute;bottom:5px;left:0;right:100%;height:1px;background:var(--ink);transition:right .16s}
+    nav>a:hover::after{right:0}
+    .nav-cta{border:1px solid var(--ink);padding:12px 17px;display:flex;gap:27px;align-items:center;transition:background .15s,color .15s}
+    .nav-cta:hover{background:var(--ink);color:var(--paper)}
+    .hero{padding-top:34px}
+    .section-top{display:flex;align-items:center;justify-content:space-between;gap:20px}
+    .signal{display:inline-flex;align-items:center;gap:9px}
+    .signal::before{content:'';width:7px;height:7px;background:var(--orange);display:block}
+    .hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:50px;align-items:center;margin:47px 0 43px}
+    h1,h2,h3,p{margin:0}
+    h1{font-size:clamp(62px,6.7vw,106px);font-weight:500;line-height:.99;letter-spacing:-.07em;margin:0 0 29px}
+    h1 span{color:var(--orange)}
+    .hero-copy>p{max-width:350px;font-size:16px;line-height:1.65;color:var(--muted)}
+    .button{display:inline-flex;justify-content:space-between;align-items:center;gap:40px;background:var(--ink);color:var(--white);padding:18px 21px;border:1px solid var(--ink);font-size:13px;line-height:1.3;transition:background .15s,transform .15s}
+    .button:hover{background:#41473a;transform:translateY(-2px)}
+    .button:active{transform:translateY(0)}
+    .hero-copy .button{margin-top:32px}
+    .arrow{font-size:20px;line-height:1;font-weight:400}
+    .hero-note{display:block;margin-top:15px;color:var(--muted);font-size:9px}
+    .hero-figure{margin:0;position:relative}
+    .mosaic{aspect-ratio:1;display:grid;grid-template-columns:repeat(4,1fr);background:var(--ink);border:1px solid var(--ink);gap:1px;overflow:hidden}
+    .tile{position:relative;overflow:hidden;aspect-ratio:1;background:var(--orange);--shape:var(--ink)}
+    .tile::before,.tile::after{content:'';position:absolute}
+    .arch::before{width:100%;height:100%;border-radius:50% 50% 0 0;background:var(--shape);top:0;left:0}
+    .arch::after{height:50%;width:50%;background:var(--orange);bottom:0;left:25%;border-radius:50% 50% 0 0}
+    .quarter::before{inset:0;background:var(--shape);border-radius:100% 0 0 0}
+    .circle::before{inset:0;border-radius:50%;background:var(--shape)}
+    .cut::before{inset:0;background:linear-gradient(135deg,var(--shape) 50%,transparent 50%)}
+    .bars::before{inset:0;background:repeating-linear-gradient(90deg,var(--shape) 0,var(--shape) 17%,transparent 17%,transparent 33.33%)}
+    .rings::before{width:200%;height:200%;left:0;top:0;border-radius:50%;background:repeating-radial-gradient(circle at center,var(--shape) 0,var(--shape) 9%,var(--orange) 9%,var(--orange) 18%);transform:translate(-50%,-50%)}
+    .light{background:var(--paper);--shape:var(--orange)}
+    .light.arch::after{background:var(--paper)}
+    .dark{background:var(--ink);--shape:var(--paper)}
+    .sage{background:var(--sage);--shape:var(--ink)}
+    .turn{transform:rotate(180deg)}
+    .right{transform:rotate(90deg)}
+    .mosaic-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:var(--paper);width:27%;aspect-ratio:1;border:1px solid var(--ink);display:flex;flex-direction:column;justify-content:center;align-items:center;gap:10px;text-align:center}
+    .mosaic-center .brand-mark{height:35px;width:35px;gap:5px}
+    .mosaic-center .brand-mark i{width:8px}
+    .mosaic-center .brand-mark i:nth-child(2){height:24px}
+    .mosaic-center .brand-mark i:nth-child(3){height:13px}
+    .mosaic-center .mono{font-size:8px;letter-spacing:.13em}
+    figcaption{display:flex;justify-content:space-between;gap:15px;padding-top:13px;color:var(--muted);font-size:9px!important}
+    .hero-bottom{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:19px 0;display:grid;grid-template-columns:1fr 1fr;gap:50px}
+    .hero-bottom>span:last-child{display:flex;justify-content:space-between;gap:16px}
+    .down{font-size:16px}
+    .principle{padding-top:100px;padding-bottom:95px;display:grid;grid-template-columns:1fr 3fr;gap:44px}
+    .section-index{display:flex;gap:16px;padding-top:8px}
+    .section-index .number{color:var(--orange)}
+    h2{font-size:clamp(35px,4.2vw,62px);font-weight:500;line-height:1.08;letter-spacing:-.055em}
+    .principle h2{max-width:900px}
+    .quiet{color:#85897c}
+    .principle-detail{display:grid;grid-template-columns:1fr 1fr;gap:55px;margin-top:31px}
+    .body-copy{font-size:15px;line-height:1.75;color:var(--muted)}
+    .principle-rule{border-left:2px solid var(--orange);padding-left:19px;align-self:start;font-size:13px;line-height:1.7;max-width:310px}
+    .method{border-top:1px solid var(--ink);padding-top:22px}
+    .method-heading{display:flex;justify-content:space-between;align-items:end;gap:24px;margin:37px 0 34px}
+    .method-heading h2{font-size:40px}
+    .method-heading>p{max-width:280px}
+    .steps{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--ink)}
+    .step{padding:28px;border-right:1px solid var(--ink)}
+    .step:last-child{border:0}
+    .step-label{display:flex;justify-content:space-between}
+    .step-art{height:160px;display:flex;align-items:center;justify-content:center;margin:22px 0 25px}
+    .art-one{display:grid;grid-template-columns:repeat(4,29px);gap:6px}
+    .art-one i{width:29px;height:29px;border:1px solid var(--ink);display:block}
+    .art-one i:nth-child(3n){background:var(--ink)}
+    .art-one i:nth-child(6),.art-one i:nth-child(11){background:var(--orange);border-color:var(--orange)}
+    .art-two{width:155px;height:155px;border:1px solid var(--ink);border-radius:50%;position:relative;background:conic-gradient(var(--orange) 0deg 120deg,transparent 120deg 240deg,var(--sage) 240deg 360deg)}
+    .art-two::before{content:'';position:absolute;inset:29px;border-radius:50%;border:1px solid var(--ink);background:var(--paper)}
+    .art-two::after{content:'';position:absolute;left:50%;top:50%;width:63px;height:1px;background:var(--ink);transform:rotate(-30deg);transform-origin:left}
+    .art-three{width:150px;height:150px;display:grid;grid-template-columns:1fr 1fr;gap:4px}
+    .art-three i{background:var(--ink);border-radius:100% 0 0 0}
+    .art-three i:nth-child(2){transform:rotate(90deg);background:var(--orange)}
+    .art-three i:nth-child(3){transform:rotate(-90deg);background:var(--sage)}
+    .art-three i:nth-child(4){transform:rotate(180deg)}
+    .step h3{font-size:24px;font-weight:500;letter-spacing:-.04em;margin-bottom:12px}
+    .step p{font-size:14px;line-height:1.7;color:var(--muted);max-width:310px}
+    .neighborhood{margin-top:105px;padding:55px 0 60px;background:var(--ink);color:var(--paper)}
+    .neighborhood .section-top{color:var(--sage)}
+    .neighborhood-heading{display:flex;justify-content:space-between;gap:60px;margin:44px 0 36px;align-items:flex-end}
+    .neighborhood-heading h2{max-width:600px}
+    .neighborhood-heading .body-copy{max-width:320px;color:#b9bdaf}
+    .schedule-top{border-top:1px solid #59604f;display:flex;align-items:center;justify-content:space-between;padding:22px 0;gap:20px}
+    .time-controls{display:flex;border:1px solid #737a69;padding:4px;gap:4px}
+    .time-button{padding:11px 23px;border:0;color:var(--paper);background:transparent;font:12px var(--mono);transition:background .14s,color .14s;min-height:44px}
+    .time-button:hover{background:#3b4333}
+    .time-button[aria-pressed="true"]{background:var(--paper);color:var(--ink)}
+    .block-map{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+    .space{width:100%;aspect-ratio:1;min-width:0;background:#32392c;border:1px solid #616953;position:relative;overflow:hidden;padding:18px;display:flex;flex-direction:column;justify-content:space-between;transition:background .18s,color .18s}
+    .space.active{background:var(--sage);color:var(--ink);border-color:var(--sage)}
+    .space.active.accent{background:var(--orange);border-color:var(--orange);color:var(--ink)}
+    .space-top,.space-bottom{position:relative;z-index:1}
+    .space-top{display:flex;justify-content:space-between;gap:8px;font-size:9px}
+    .space-bottom h3{font-size:18px;font-weight:500;letter-spacing:-.04em;margin-bottom:5px}
+    .space-bottom p{font-size:11px;line-height:1.5}
+    .space-glyph{position:absolute;width:47%;aspect-ratio:1;left:26.5%;top:22%;opacity:.45;border:1px solid currentColor;border-radius:50% 50% 0 0}
+    .space-glyph::before{content:'';position:absolute;inset:20%;border:1px solid currentColor;border-radius:inherit}
+    .space:nth-child(2) .space-glyph{border-radius:50%}
+    .space:nth-child(3) .space-glyph{border-radius:0;transform:rotate(45deg);width:35%;left:32.5%;top:27%}
+    .space:nth-child(4) .space-glyph{border-radius:100% 0 0 0}
+    .schedule-bottom{display:grid;grid-template-columns:1fr 1fr;gap:40px;border-bottom:1px solid #59604f;padding:22px 0;min-height:91px;align-items:start}
+    .schedule-bottom .body-copy{color:#b9bdaf;font-size:12px}
+    .live-summary{display:flex;align-items:baseline;gap:13px;flex-wrap:wrap}
+    .live-summary strong{font-size:27px;font-weight:500;letter-spacing:-.04em}
+    .live-summary span{color:#c5cbbb;font-size:10px}
+    .system-note{margin-top:20px;color:#b9bdaf;font-size:9px}
+    .compact{padding-top:83px;padding-bottom:83px}
+    .compact h2{max-width:780px}
+    .values{display:flex;gap:28px;margin-top:30px;flex-wrap:wrap}
+    .values span{border-top:1px solid var(--line);padding-top:12px;flex:1;min-width:130px;font-size:10px}
+    .invitation{border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);display:grid;grid-template-columns:1fr 1fr}
+    .invitation-copy{padding:45px 50px 45px 0;display:flex;flex-direction:column;align-items:flex-start}
+    .invitation h2{font-size:clamp(47px,5.2vw,76px);margin:33px 0 22px}
+    .invitation-copy .body-copy{max-width:310px}
+    .end-symbol{display:flex;margin-top:40px;width:135px;height:45px}
+    .end-symbol i{width:45px;height:45px;background:var(--orange);border-radius:50%}
+    .end-symbol i:nth-child(2){border-radius:50% 0 0 50%}
+    .end-symbol i:nth-child(3){border-radius:0}
+    .planner{padding:45px 0 45px 45px;border-left:1px solid var(--ink)}
+    .planner h3{font-size:21px;font-weight:500;letter-spacing:-.04em;margin-bottom:9px}
+    .planner-intro{font-size:13px;line-height:1.6;color:var(--muted);margin-bottom:27px}
+    .field{display:block;margin-bottom:22px}
+    .field>span{display:block;margin-bottom:10px;font-size:10px}
+    select{display:block;width:100%;border:1px solid var(--line);border-radius:0;background:transparent;color:var(--ink);padding:14px 12px;font-size:14px;min-height:48px}
+    .planner .button{width:100%;margin-top:3px}
+    .privacy-note{font-size:9px;color:var(--muted);line-height:1.6;margin-top:13px}
+    .plan-result{margin-top:23px;padding:20px;background:var(--sage);border:1px solid var(--ink)}
+    .plan-result[hidden]{display:none}
+    .plan-result h4{font-size:20px;font-weight:500;letter-spacing:-.04em;margin:8px 0 10px}
+    .plan-result p{font-size:13px;line-height:1.6}
+    .download{margin-top:17px;padding:0 0 6px;background:none;border:0;border-bottom:1px solid var(--ink);font-size:12px;color:var(--ink);min-height:32px}
+    footer{padding:28px 0 32px}
+    .footer-top{display:flex;align-items:center;justify-content:space-between;gap:25px}
+    .footer-top .brand{font-size:22px}
+    .footer-bottom{display:flex;justify-content:space-between;gap:24px;margin-top:25px;color:var(--muted);font-size:9px}
+    .back-top{display:flex;align-items:center;gap:18px;min-height:44px}
+    @media(min-width:1600px){.hero-grid{gap:80px}.hero-copy>p{font-size:18px;max-width:400px}}
+    @media(max-width:1050px){.wrap{width:calc(100% - 64px)}.header-caption{display:none}.hero-grid{gap:30px}h1{font-size:clamp(57px,7.1vw,76px)}.hero-copy>p{font-size:14px}.hero-bottom{gap:30px}.principle{grid-template-columns:1fr 3fr;gap:25px}.step{padding:22px}.space{padding:13px}.space-bottom h3{font-size:16px}.space-glyph{top:20%}.neighborhood-heading h2{font-size:43px}.neighborhood-heading{gap:30px}.invitation-copy{padding-right:30px}.planner{padding-left:30px}.space-bottom p{font-size:10px}}
+    @media(max-width:760px){html{scroll-padding-top:80px}.wrap{width:calc(100% - 40px)}.header-inner{height:70px;gap:15px}.brand{font-size:23px}nav{gap:16px}nav>a:not(.nav-cta){display:none}.nav-cta{padding:10px 12px;gap:14px;font-size:11px}.hero{padding-top:25px}.section-top{font-size:9px}.hero .section-top>span:last-child{font-size:8px}.hero-grid{grid-template-columns:1fr;gap:36px;margin-top:38px;margin-bottom:30px}h1{font-size:clamp(65px,11.5vw,88px);max-width:600px}.hero-copy>p{max-width:370px;font-size:15px}.hero-copy .button{margin-top:24px}.hero-note{font-size:8px}.hero-figure{max-width:560px;width:100%;justify-self:center}.hero-bottom{grid-template-columns:1fr;gap:13px;padding:17px 0;font-size:9px}.hero-bottom>span:last-child{border-top:1px solid var(--line);padding-top:13px}.principle{grid-template-columns:1fr;gap:25px;padding-top:65px;padding-bottom:60px}.principle-detail{gap:25px}.principle h2{font-size:38px}.body-copy{font-size:14px}.principle-rule{font-size:12px}.method-heading{align-items:start;flex-direction:column;margin-top:28px;gap:17px}.method-heading h2{font-size:36px}.method-heading>p{max-width:360px}.steps{grid-template-columns:1fr}.step{display:grid;grid-template-columns:100px 1fr;gap:0 22px;padding:24px;border-right:0;border-bottom:1px solid var(--ink)}.step-label{grid-column:1/-1;margin-bottom:20px}.step-art{grid-row:2/4;margin:0;height:120px;transform:scale(.64);transform-origin:center}.step h3{font-size:24px;align-self:end;margin-bottom:9px}.step p{font-size:13px}.neighborhood{margin-top:65px;padding:35px 0}.neighborhood-heading{flex-direction:column;align-items:start;gap:22px;margin:32px 0}.neighborhood-heading h2{font-size:40px}.neighborhood-heading .body-copy{max-width:420px}.schedule-top{align-items:start;flex-direction:column;gap:18px}.time-controls{width:100%}.time-button{flex:1;padding:12px 10px}.block-map{grid-template-columns:1fr 1fr;gap:8px}.space{padding:14px;min-height:190px}.space-bottom h3{font-size:18px}.space-bottom p{font-size:11px}.space-top{font-size:8px}.schedule-bottom{grid-template-columns:1fr;gap:10px}.system-note{font-size:8px;line-height:1.7}.compact h2{font-size:36px}.values{gap:16px}.invitation{grid-template-columns:1fr}.invitation-copy{padding:33px 0}.invitation h2{font-size:61px;margin-top:25px}.end-symbol{margin-top:25px}.planner{border-left:0;border-top:1px solid var(--ink);padding:30px 0}.footer-top>.mono{display:none}.footer-bottom{flex-direction:column;gap:10px;font-size:8px}}
+    @media(max-width:380px){.wrap{width:calc(100% - 32px)}h1{font-size:59px}.principle-detail{grid-template-columns:1fr}.space{padding:10px;min-height:180px}.space-bottom h3{font-size:16px}.step{padding:20px 14px;grid-template-columns:80px 1fr;gap:0 15px}.step-art{transform:scale(.53)}.section-top{letter-spacing:0}.mosaic-center .mono{font-size:6px}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important}.button:hover{transform:none}}
+  </style>
+  <style>
+    .world,.journey-rail,.scene-tools,.arrival{display:none}
+    html.is-3d{scroll-behavior:auto;scroll-padding-top:104px}
+    .is-3d body{background:var(--paper)}
+    .world{position:fixed;inset:0;pointer-events:none;z-index:0}
+    .world canvas{display:block;width:100%;height:100%}
+    .is-3d .world{display:block}
+    .is-3d body::after{content:'';position:fixed;inset:0;z-index:40;pointer-events:none;opacity:.035;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.87' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Cpath fill='%23000' filter='url(%23n)' opacity='.6' d='M0 0h180v180H0z'/%3E%3C/svg%3E")}
+    .is-3d main,.is-3d footer{position:relative;z-index:1}
+    .is-3d .site-header{background:rgba(238,234,225,.91);backdrop-filter:blur(14px)}
+    .is-3d .wrap{width:calc(100% - 128px);max-width:1600px}
+    .is-3d .hero{min-height:calc(100svh - 84px);padding-top:28px;display:flex;flex-direction:column}
+    .is-3d .hero-grid{flex:1;min-height:570px;grid-template-columns:1.05fr 1fr;gap:0;margin:35px 0}
+    .is-3d h1{font-size:clamp(66px,6.8vw,110px);letter-spacing:-.075em;position:relative}
+    .is-3d .hero-copy{position:relative;isolation:isolate}
+    .is-3d .hero-copy::before{content:'';position:absolute;inset:-70px -65px -65px -80px;background:radial-gradient(ellipse at 30% 50%,rgba(238,234,225,.99) 20%,rgba(238,234,225,.94) 45%,rgba(238,234,225,0) 72%);z-index:-1;pointer-events:none}
+    .is-3d .hero-figure{height:100%;min-height:460px;display:flex;align-items:flex-end;pointer-events:none}
+    .is-3d .mosaic{display:none}
+    .is-3d .mosaic-center{top:43%;left:45%;width:122px;border:0;background:transparent;gap:13px}
+    .is-3d .mosaic-center .brand-mark{display:none}
+    .is-3d .mosaic-center .mono{font-size:9px;background:rgba(238,234,225,.8);padding:8px;line-height:1.7}
+    .is-3d figcaption{width:100%;padding:13px 0;border-top:1px solid rgba(35,39,32,.25);color:var(--ink);background:linear-gradient(90deg,transparent,rgba(238,234,225,.8))}
+    .is-3d .hero-bottom{margin-bottom:52px;background:rgba(238,234,225,.72)}
+    .is-3d .principle{min-height:100svh;align-content:center;grid-template-columns:1fr;gap:40px;padding-top:140px;padding-bottom:140px;position:relative}
+    .is-3d .principle>div:last-child{max-width:780px;padding:34px 40px 38px 0;background:linear-gradient(90deg,rgba(238,234,225,.98) 65%,rgba(238,234,225,.8));border-top:1px solid var(--line)}
+    .is-3d .principle .section-index{width:max-content;background:var(--paper);padding:8px 12px 8px 0}
+    .is-3d .principle h2{font-size:clamp(38px,4.8vw,72px)}
+    .is-3d .quiet{color:#6c7263}
+    .is-3d .method{min-height:110svh;padding-top:70px;padding-bottom:110px;display:flex;flex-direction:column;justify-content:center;border-top:0}
+    .is-3d .method .section-top,.is-3d .method-heading{background:rgba(238,234,225,.92);padding:18px 24px;margin:0}
+    .is-3d .method-heading{padding-bottom:35px}
+    .is-3d .steps{background:rgba(238,234,225,.94)}
+    .is-3d .step-art{height:130px}
+    .is-3d .neighborhood{min-height:110svh;margin-top:0;display:flex;align-items:center;background:linear-gradient(90deg,rgba(35,39,32,.99),rgba(35,39,32,.88) 65%,rgba(35,39,32,.55));padding:100px 0}
+    .is-3d .neighborhood-heading{max-width:1000px}
+    .is-3d .space{aspect-ratio:1.3;background:rgba(50,57,44,.94)}
+    .is-3d .space.active{background:var(--sage)}
+    .is-3d .space.active.accent{background:var(--orange)}
+    .is-3d .invitation{min-height:92svh;align-content:center;border:0;gap:70px;padding:100px 0}
+    .is-3d .invitation-copy{background:linear-gradient(90deg,rgba(238,234,225,.96),rgba(238,234,225,.75));padding:35px 30px 35px 0}
+    .is-3d .planner{padding:35px;background:rgba(238,234,225,.96);border:1px solid var(--ink);align-self:center}
+    .is-3d footer{background:var(--paper);padding-bottom:90px}
+    .is-3d .journey-rail{display:flex;position:fixed;z-index:25;left:64px;right:64px;bottom:20px;align-items:center;gap:18px;pointer-events:none}
+    .rail-line{height:1px;background:var(--line);flex:1;position:relative}
+    .rail-line i{position:absolute;inset:0;background:var(--orange);transform:scaleX(var(--progress,0));transform-origin:left}
+    .rail-label{background:var(--paper);padding:7px 9px;font-size:9px;min-width:132px}
+    .rail-links{display:flex;gap:5px;pointer-events:auto;background:var(--paper);padding:4px}
+    .rail-links a{padding:7px 9px;font:10px var(--mono);color:var(--muted)}
+    .rail-links a[aria-current="step"]{background:var(--ink);color:var(--paper)}
+    .scene-tools{position:fixed;z-index:26;right:64px;bottom:65px;gap:16px;align-items:center}
+    .is-3d .scene-tools,.is-flat .scene-tools{display:flex}
+    .scene-hint{font-size:8px;background:rgba(238,234,225,.85);padding:6px 8px;color:var(--muted)}
+    .motion-toggle{background:var(--paper);color:var(--ink);border:1px solid var(--line);padding:9px 12px;font:9px var(--mono);min-height:36px}
+    .is-flat .scene-tools{right:20px;bottom:16px}
+    .is-flat .scene-hint{display:none}
+    .arrival:not([hidden]){display:flex;position:fixed;inset:0;z-index:60;flex-direction:column;align-items:center;justify-content:center;background:var(--paper);gap:30px;transition:opacity .55s;pointer-events:none}
+    .arrival.leaving{opacity:0}
+    .arrival-word{font-size:clamp(45px,9vw,120px);letter-spacing:-.075em;font-weight:500}
+    .arrival-track{height:2px;width:min(320px,60vw);background:var(--line)}
+    .arrival-track i{display:block;height:100%;background:var(--orange);transform:scaleX(var(--loaded,0));transform-origin:left;transition:transform .3s}
+    .arrival-meta{display:flex;justify-content:space-between;width:min(320px,60vw);font-size:9px}
+    @media(max-width:1050px){.is-3d .wrap{width:calc(100% - 64px)}.is-3d .hero-grid{min-height:530px}.is-3d h1{font-size:7.1vw}.is-3d .journey-rail{left:32px;right:32px}.scene-tools{right:32px}.is-3d .principle>div:last-child{max-width:700px}.is-3d .invitation{gap:25px}.is-3d .planner{padding:24px}}
+    @media(max-width:760px){.is-3d .wrap{width:calc(100% - 40px)}.is-3d .hero{min-height:auto}.is-3d .hero-grid{display:flex;flex-direction:column;margin-top:36px;align-items:stretch;gap:12px}.is-3d h1{font-size:clamp(58px,11.5vw,86px)}.is-3d .hero-copy::before{inset:-45px -20px;background:linear-gradient(var(--paper) 50%,rgba(238,234,225,.94) 75%,transparent)}.is-3d .hero-figure{height:340px;min-height:340px;max-width:none}.is-3d .mosaic-center{top:42%;left:50%}.is-3d .hero-bottom{margin-bottom:35px}.is-3d .principle{min-height:95svh;padding:100px 0;gap:25px}.is-3d .principle>div:last-child{padding:24px 15px 24px 0;background:rgba(238,234,225,.95)}.is-3d .principle h2{font-size:38px}.is-3d .method{padding:100px 0}.is-3d .method .section-top,.is-3d .method-heading{padding:16px}.is-3d .step-art{height:105px}.is-3d .neighborhood{padding:85px 0}.is-3d .space{aspect-ratio:1}.is-3d .invitation{grid-template-columns:1fr;padding:90px 0;gap:20px}.is-3d .invitation-copy{padding:25px 0}.is-3d .planner{padding:24px}.is-3d .journey-rail{left:20px;right:20px;bottom:12px;gap:8px}.rail-label{font-size:8px;min-width:112px}.rail-links a{padding:9px 6px}.scene-tools{right:20px;bottom:57px}.scene-hint{display:none}.is-3d footer{padding-bottom:110px}}
+    @media(max-width:760px){.is-3d .hero>.section-top{position:relative;z-index:2;align-items:flex-start}.is-3d .hero-note{width:fit-content;background:rgba(238,234,225,.94);padding:5px 7px}}
+    @media(prefers-reduced-motion:reduce){.arrival{display:none!important}}
+  </style>
+  <script type="importmap">
+    {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"}}
+  </script>
+</head>
+<body id="top">
+  <div class="world" id="world" aria-hidden="true"></div>
+  <div class="arrival" id="arrival" role="status" aria-label="Preparing the spatial experience" hidden>
+    <span class="arrival-word">INTERVAL</span><div class="arrival-track"><i></i></div>
+    <div class="arrival-meta mono"><span>Separate spaces. Shared possibility.</span><span id="arrival-progress">00%</span></div>
+  </div>
+  <div class="scene-tools"><span class="scene-hint mono">Move to draw closer · click to connect</span><button class="motion-toggle" id="motion-toggle" type="button" aria-pressed="true">Motion on ↗</button></div>
+  <nav class="journey-rail" aria-label="Spatial journey"><span class="rail-label mono" id="chapter-label">00 / The space between</span><span class="rail-line" aria-hidden="true"><i></i></span><div class="rail-links"><a href="#top" aria-label="Opening" aria-current="step">00</a><a href="#idea" aria-label="The overlooked resource">01</a><a href="#method" aria-label="A simple spatial equation">02</a><a href="#in-motion" aria-label="The same block, three ways">03</a><a href="#care" aria-label="Designed to coexist">04</a><a href="#your-interval" aria-label="Start with what you have">05</a></div></nav>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="#top" aria-label="Interval home"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>INTERVAL</a>
+      <span class="header-caption mono">The space between uses.</span>
+      <nav aria-label="Main navigation">
+        <a href="#idea">The idea</a>
+        <a href="#in-motion">In motion</a>
+        <a class="nav-cta" href="#your-interval">Find your interval <span aria-hidden="true">↗</span></a>
+      </nav>
+    </div>
+  </header>
+  <main id="main">
+    <section class="hero wrap" aria-labelledby="hero-title">
+      <div class="section-top mono"><span class="signal">A new commons, hiding in plain sight</span><span>Space × time = possibility</span></div>
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <h1 id="hero-title">More room.<br>Same city.<br><span>Different hours.</span></h1>
+          <p>A quiet restaurant before service. A studio after class. We turn the hours between uses into places for a neighborhood to come together.</p>
+          <a class="button" href="#idea">See the space between <span class="arrow" aria-hidden="true">↘</span></a>
+          <span class="hero-note mono">No new buildings. A new way to belong.</span>
+        </div>
+        <figure class="hero-figure">
+          <div class="mosaic" role="img" aria-label="Sixteen geometric modules tessellate into a shared courtyard, representing different spaces joined by time.">
+            <div class="tile arch"></div><div class="tile quarter light turn"></div><div class="tile circle"></div><div class="tile rings"></div>
+            <div class="tile quarter dark"></div><div class="tile cut"></div><div class="tile arch light turn"></div><div class="tile quarter turn"></div>
+            <div class="tile arch light"></div><div class="tile circle sage"></div><div class="tile quarter"></div><div class="tile arch right"></div>
+            <div class="tile rings turn"></div><div class="tile quarter turn"></div><div class="tile bars light"></div><div class="tile circle dark"></div>
+          </div>
+          <div class="mosaic-center" aria-hidden="true"><span class="brand-mark"><i></i><i></i><i></i></span><span class="mono">Separate spaces.<br>Shared possibility.</span></div>
+          <figcaption class="mono"><span>Fig. 01 — The neighborhood, recomposed</span><span>16 parts / one whole</span></figcaption>
+        </figure>
+      </div>
+      <div class="hero-bottom mono"><span>An operating system for the hours we overlook.</span><span><span>Built around what is already here.</span><a href="#idea" aria-label="Scroll to the idea"><span class="down" aria-hidden="true">↓</span></a></span></div>
+    </section>
+
+    <section class="principle wrap" id="idea" aria-labelledby="idea-title">
+      <div class="section-index mono"><span class="number">01 /</span><span>The overlooked resource</span></div>
+      <div>
+        <h2 id="idea-title">The city isn’t out of space.<br><span class="quiet">Its spaces are out of sync.</span></h2>
+        <div class="principle-detail">
+          <p class="body-copy">Every neighborhood has two maps. The one of its buildings. And the invisible one of when they’re empty. INTERVAL brings them together, making a shared place from the gaps.</p>
+          <p class="principle-rule">Not another space to rent.<br>A local commons to contribute to.<br>Give hours. Get possibility back.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="method wrap" id="method" aria-labelledby="method-title">
+      <div class="section-top mono"><span>02 / A simple spatial equation</span><span>Less building. More connecting.</span></div>
+      <div class="method-heading"><h2 id="method-title">Small intervals. A larger whole.</h2><p class="body-copy">A reciprocal network, measured in useful hours rather than square meters.</p></div>
+      <div class="steps">
+        <article class="step">
+          <div class="step-label mono"><span>01 — Reveal</span><span>↗</span></div>
+          <div class="step-art" aria-hidden="true"><div class="art-one"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+          <h3>Find the quiet hours.</h3><p>Hosts mark when a space sits unused, what it can support, and what must stay exactly as it is.</p>
+        </article>
+        <article class="step">
+          <div class="step-label mono"><span>02 — Align</span><span>↗</span></div>
+          <div class="step-art" aria-hidden="true"><div class="art-two"></div></div>
+          <h3>Give every hour a fit.</h3><p>Match a neighborhood need to a compatible space. Leave room for arrival, reset, and the life already there.</p>
+        </article>
+        <article class="step">
+          <div class="step-label mono"><span>03 — Multiply</span><span>↗</span></div>
+          <div class="step-art" aria-hidden="true"><div class="art-three"><i></i><i></i><i></i><i></i></div></div>
+          <h3>Make sharing reciprocal.</h3><p>Contributed hours earn access to other spaces. A single spare room becomes part of a whole neighborhood.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="neighborhood" id="in-motion" aria-labelledby="motion-title">
+      <div class="wrap">
+        <div class="section-top mono"><span>03 / The same block, three ways</span><span class="signal">An illustrative day</span></div>
+        <div class="neighborhood-heading"><h2 id="motion-title">The buildings stay.<br>The possibilities shift.</h2><p class="body-copy">Move through a day. Watch private spaces open into a shared neighborhood, then return to their everyday lives.</p></div>
+        <div class="schedule-top"><span class="mono">One neighborhood / four participating spaces</span><div class="time-controls" role="group" aria-label="Choose a time of day"><button class="time-button" type="button" data-time="morning" aria-pressed="true" aria-controls="block-map schedule-status">08:00</button><button class="time-button" type="button" data-time="afternoon" aria-pressed="false" aria-controls="block-map schedule-status">13:00</button><button class="time-button" type="button" data-time="evening" aria-pressed="false" aria-controls="block-map schedule-status">18:00</button></div></div>
+        <div class="block-map" id="block-map">
+          <article class="space active accent"><div class="space-top mono"><span>01 / Restaurant</span><span class="space-state">Open to share</span></div><div class="space-glyph" aria-hidden="true"></div><div class="space-bottom"><h3>The morning table</h3><p>Quiet coworking · 08:00–11:00</p></div></article>
+          <article class="space"><div class="space-top mono"><span>02 / Movement studio</span><span class="space-state">Everyday use</span></div><div class="space-glyph" aria-hidden="true"></div><div class="space-bottom"><h3>In its own rhythm</h3><p>Morning classes · with the host</p></div></article>
+          <article class="space active"><div class="space-top mono"><span>03 / Workshop</span><span class="space-state">Open to share</span></div><div class="space-glyph" aria-hidden="true"></div><div class="space-bottom"><h3>Room to repair</h3><p>Community mending · 08:00–10:00</p></div></article>
+          <article class="space"><div class="space-top mono"><span>04 / Office</span><span class="space-state">Everyday use</span></div><div class="space-glyph" aria-hidden="true"></div><div class="space-bottom"><h3>A working day</h3><p>Team workspace · with the host</p></div></article>
+        </div>
+        <div class="schedule-bottom" id="schedule-status" aria-live="polite" aria-atomic="true"><div class="live-summary"><strong id="open-count">2 spaces open</strong><span class="mono" id="shared-hours">5 shared space-hours</span></div><p class="body-copy" id="time-story">Before the first lunch order, a table becomes a desk. Down the street, a workbench becomes a meeting point.</p></div>
+        <p class="system-note mono">Model neighborhood, not live availability. Shared hours are the sum of the illustrated opening windows.</p>
+      </div>
+    </section>
+
+    <section class="principle compact wrap" id="care" aria-labelledby="care-title">
+      <div class="section-index mono"><span class="number">04 /</span><span>Designed to coexist</span></div>
+      <div><h2 id="care-title">A commons, not a free-for-all.<br><span class="quiet">The boundaries make it work.</span></h2><div class="principle-detail"><p class="body-copy">A space is someone’s livelihood before it’s anyone’s possibility. Hosts set the boundaries. Every proposed match needs an agreed use, a named steward, and a clear handover.</p><p class="body-copy">Access, accessibility, insurance, and reset time are checked before a space opens. Sharing should add to a neighborhood, not ask it to absorb the cost.</p></div><div class="values mono"><span>01 / Host-led rules</span><span>02 / Supported access</span><span>03 / Leave it ready</span></div></div>
+    </section>
+
+    <section class="invitation wrap" id="your-interval" aria-labelledby="invitation-title">
+      <div class="invitation-copy"><span class="signal mono">05 / Start with what you have</span><h2 id="invitation-title">Your space.<br>Its next life.</h2><p class="body-copy">You don’t need a new building.<br>Just a few hours worth opening.<br>See what your interval could become.</p><div class="end-symbol" aria-hidden="true"><i></i><i></i><i></i></div></div>
+      <div class="planner">
+        <h3>Find your first interval.</h3><p class="planner-intro">A small thought experiment. A practical starting point.</p>
+        <form id="interval-form">
+          <label class="field" for="space-type"><span class="mono">01 / What kind of space do you have?</span><select id="space-type" name="space"><option value="restaurant">A restaurant or café</option><option value="studio">A movement or creative studio</option><option value="workshop">A workshop or makerspace</option><option value="office">An office or meeting room</option></select></label>
+          <label class="field" for="free-time"><span class="mono">02 / When does it go quiet?</span><select id="free-time" name="time"><option value="morning">Mornings · 08:00–12:00</option><option value="afternoon">Afternoons · 13:00–17:00</option><option value="evening">Evenings · 18:00–22:00</option></select></label>
+          <button class="button" type="submit">Reveal my interval <span class="arrow" aria-hidden="true">↗</span></button>
+          <p class="privacy-note mono">No signup. Nothing sent or stored. This is a concept planner, not a booking.</p>
+        </form>
+        <div class="plan-result" id="plan-result" role="status" aria-live="polite" aria-atomic="true" hidden></div>
+        <button class="download" type="button" id="download-plan" hidden>Download your starting brief <span aria-hidden="true">↓</span></button>
+      </div>
+    </section>
+  </main>
+  <footer class="wrap">
+    <div class="footer-top"><a href="#top" class="brand" aria-label="Interval home"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>INTERVAL</a><span class="mono">More room for life. No new buildings.</span><a href="#top" class="back-top mono">Back to the beginning <span class="arrow" aria-hidden="true">↑</span></a></div>
+    <div class="footer-bottom mono"><span>© 2026 Interval / An independent concept for a shared city.</span><span>Space is finite. Possibility is a matter of arrangement.</span></div>
+  </footer>
+  <script>
+    (() => {
+      'use strict';
+      const schedules = {
+        morning: {
+          hours: 5,
+          story: 'Before the first lunch order, a table becomes a desk. Down the street, a workbench becomes a meeting point.',
+          spaces: [
+            [true, 'The morning table', 'Quiet coworking · 08:00–11:00'],
+            [false, 'In its own rhythm', 'Morning classes · with the host'],
+            [true, 'Room to repair', 'Community mending · 08:00–10:00'],
+            [false, 'A working day', 'Team workspace · with the host']
+          ]
+        },
+        afternoon: {
+          hours: 3,
+          story: 'As lunch service begins, the studio opens its quieter hours. The commons moves without adding a single room.',
+          spaces: [
+            [false, 'Service, as usual', 'Lunch service · with the host'],
+            [true, 'A place to rehearse', 'Neighborhood theatre · 13:00–16:00'],
+            [false, 'Making a living', 'Workshop production · with the host'],
+            [false, 'A working day', 'Team workspace · with the host']
+          ]
+        },
+        evening: {
+          hours: 7,
+          story: 'The working day ends. A meeting room becomes a language circle, while neighbors learn and make a few doors away.',
+          spaces: [
+            [false, 'Service, as usual', 'Dinner service · with the host'],
+            [true, 'Room to slow down', 'Community meditation · 18:00–20:00'],
+            [true, 'Make it together', 'Supervised making · 18:00–21:00'],
+            [true, 'A common language', 'Language exchange · 18:00–20:00']
+          ]
+        }
+      };
+      const timeButtons = [...document.querySelectorAll('.time-button')];
+      const spaces = [...document.querySelectorAll('.space')];
+      timeButtons.forEach(button => button.addEventListener('click', () => {
+        const schedule = schedules[button.dataset.time];
+        timeButtons.forEach(item => item.setAttribute('aria-pressed', String(item === button)));
+        let highlighted = false;
+        schedule.spaces.forEach(([active, title, detail], index) => {
+          const space = spaces[index];
+          space.classList.toggle('active', active);
+          space.classList.toggle('accent', active && !highlighted);
+          if (active) highlighted = true;
+          space.querySelector('.space-state').textContent = active ? 'Open to share' : 'Everyday use';
+          space.querySelector('h3').textContent = title;
+          space.querySelector('.space-bottom p').textContent = detail;
+        });
+        const count = schedule.spaces.filter(space => space[0]).length;
+        document.getElementById('open-count').textContent = `${count} ${count === 1 ? 'space' : 'spaces'} open`;
+        document.getElementById('shared-hours').textContent = `${schedule.hours} shared space-hours`;
+        document.getElementById('time-story').textContent = schedule.story;
+      }));
+
+      const possibilities = {
+        restaurant: { morning: 'A neighborhood worktable.', afternoon: 'A table for shared learning.', evening: 'A supper-time reading circle.', check: 'Agree which tables and facilities are available. Keep food preparation and service areas out of bounds.' },
+        studio: { morning: 'A gentle start, together.', afternoon: 'Room for a first rehearsal.', evening: 'A place to slow down.', check: 'Confirm floor care, sound limits, accessible entry, and the maximum group size with the host.' },
+        workshop: { morning: 'A morning made for mending.', afternoon: 'A neighborhood repair circle.', evening: 'An evening to make together.', check: 'Arrange a qualified steward. Agree tool permissions, safety procedures, and materials before anyone arrives.' },
+        office: { morning: 'A quiet room for big ideas.', afternoon: 'A home for homework help.', evening: 'A common language, after hours.', check: 'Separate shared rooms from private desks and files. Confirm building access and safeguarding needs.' }
+      };
+      const windows = { morning: '08:30–11:30', afternoon: '13:30–16:30', evening: '18:30–21:30' };
+      const form = document.getElementById('interval-form');
+      const result = document.getElementById('plan-result');
+      const download = document.getElementById('download-plan');
+      let brief = '';
+      form.addEventListener('change', () => {
+        result.hidden = true;
+        download.hidden = true;
+        brief = '';
+      });
+      form.addEventListener('submit', event => {
+        event.preventDefault();
+        const type = document.getElementById('space-type');
+        const time = document.getElementById('free-time').value;
+        const possibility = possibilities[type.value];
+        const title = possibility[time];
+        const window = `Proposed shared window: ${windows[time]}. Three useful hours, with 30 minutes on either side for opening and reset.`;
+        const caution = 'A starting idea only. Confirm demand, accessibility, permissions, insurance, and a named steward before opening.';
+        result.replaceChildren();
+        [['span', 'YOUR POSSIBLE INTERVAL', 'mono'], ['h4', title, ''], ['p', window, ''], ['p', possibility.check, '']].forEach(([tag, text, className]) => {
+          const element = document.createElement(tag);
+          element.textContent = text;
+          if (className) element.className = className;
+          result.append(element);
+        });
+        result.hidden = false;
+        download.hidden = false;
+        brief = `INTERVAL / Your starting brief\n\n${type.options[type.selectedIndex].text}\n${title}\n\n${window}\n\nFIRST CHECK\n${possibility.check}\n\nBEFORE OPENING\n${caution}\n\nThis concept planner does not create a booking or enroll you in a service.\n`;
+        result.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'nearest' });
+      });
+      download.addEventListener('click', () => {
+        if (!brief) return;
+        const url = URL.createObjectURL(new Blob([brief], { type: 'text/plain;charset=utf-8' }));
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'my-interval-brief.txt';
+        document.body.append(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      });
+    })();
+  </script>
+  <script type="module">
+    const root = document.documentElement;
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+    const toggle = document.getElementById('motion-toggle');
+    const arrival = document.getElementById('arrival');
+    const world = document.getElementById('world');
+    let dispose = null;
+    let generation = 0;
+    let enabled = !reduced.matches;
+
+    function flat(reason) {
+      generation++;
+      if (dispose) dispose();
+      dispose = null;
+      enabled = false;
+      root.classList.remove('is-3d');
+      root.classList.add('is-flat');
+      root.dataset.experience = reason;
+      arrival.hidden = true;
+      toggle.textContent = 'Motion off ↗';
+      toggle.setAttribute('aria-pressed', 'false');
+      toggle.disabled = reduced.matches;
+      world.replaceChildren();
+    }
+
+    function progress(value) {
+      arrival.style.setProperty('--loaded', value / 100);
+      document.getElementById('arrival-progress').textContent = `${value}%`;
+    }
+
+    async function start() {
+      if (reduced.matches) return flat('reduced-motion');
+      const ticket = ++generation;
+      enabled = true;
+      toggle.disabled = false;
+      arrival.classList.remove('leaving');
+      arrival.hidden = false;
+      progress(5);
+      const timeout = setTimeout(() => {
+        if (generation === ticket) flat('loading-timeout');
+      }, 12000);
+      try {
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('webgl2', { antialias: false, alpha: false, powerPreference: 'high-performance' });
+        if (!context) { clearTimeout(timeout); return flat('webgl-unavailable'); }
+        dispose = () => context.getExtension('WEBGL_lose_context')?.loseContext();
+        const [THREE, { RoundedBoxGeometry }] = await Promise.all([
+          import('three'), import('three/addons/geometries/RoundedBoxGeometry.js')
+        ]);
+        if (ticket !== generation) { context.getExtension('WEBGL_lose_context')?.loseContext(); return; }
+        progress(35);
+        const renderer = new THREE.WebGLRenderer({ canvas, context, antialias: false });
+        renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+        renderer.setClearColor(0xeeeae1, 1);
+        renderer.outputColorSpace = THREE.SRGBColorSpace;
+        let shaderFailed = false;
+        renderer.debug.onShaderError = () => { shaderFailed = true; };
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(38, 1, .1, 180);
+        const geometry = new RoundedBoxGeometry(1, 1, 1, 1, .075);
+        const rows = 28, columns = 128, count = rows * columns;
+        const cells = new Float32Array(count * 4);
+        for (let row = 0, i = 0; row < rows; row++) {
+          for (let column = 0; column < columns; column++, i++) {
+            cells[i * 4] = (column + .5) / columns * Math.PI * 2;
+            cells[i * 4 + 1] = row;
+            cells[i * 4 + 2] = column;
+            cells[i * 4 + 3] = ((column * 73 + row * 37) % 101) / 101;
+          }
+        }
+        geometry.setAttribute('aCell', new THREE.InstancedBufferAttribute(cells, 4));
+        const uniforms = {
+          uIntro: { value: 0 }, uOpen: { value: 0 }, uStage: { value: 0 },
+          uHover: { value: new THREE.Vector3(100, 0, 100) }, uMagnet: { value: 0 },
+          uPulse: { value: new THREE.Vector3() }, uPulseAge: { value: 10 },
+          uDay: { value: 0 }, uPaper: { value: new THREE.Color('#eeeae1') },
+          uInk: { value: new THREE.Color('#232720') }, uSage: { value: new THREE.Color('#b5bfa7') },
+          uOrange: { value: new THREE.Color('#e34a28') }
+        };
+        const material = new THREE.ShaderMaterial({
+          uniforms,
+          vertexShader: `
+            attribute vec4 aCell;
+            uniform float uIntro, uOpen, uStage, uMagnet, uPulseAge, uDay;
+            uniform vec3 uHover, uPulse;
+            varying vec3 vNormal, vWorld;
+            varying float vTone, vRim, vDepth, vAccent;
+            void main() {
+              float row = aCell.y;
+              float sector = floor(aCell.z / 8.0);
+              float angle = aCell.x + uOpen * .13 * sin(sector * 1.7);
+              float radius = 4.5 + row * .56 + uOpen * (1.0 + row * .075);
+              float aisle = step(6.5, mod(aCell.z, 8.0));
+              float terrace = floor(row / 4.0) * .53;
+              float tower = step(3.0, mod(sector, 4.0)) * smoothstep(13.0, 27.0, row);
+              float height = .4 + terrace + tower * (3.4 - uOpen * 2.2);
+              height *= 1.0 - aisle * .72;
+              height += sin(sector * 1.6 + uStage * .8) * uOpen * .7;
+              float assembly = smoothstep(aCell.w * .28, .7 + aCell.w * .28, uIntro);
+              vec3 center = vec3(cos(angle) * radius, height * .5, sin(angle) * radius);
+              float attraction = exp(-dot(center.xz-uHover.xz, center.xz-uHover.xz) * .11) * uMagnet;
+              float distanceToPulse = length(center.xz - uPulse.xz);
+              float wave = exp(-pow((distanceToPulse - uPulseAge * 24.0) * .65, 2.0));
+              wave *= (1.0-smoothstep(.65, 1.5, uPulseAge)) * step(0.0, uPulseAge);
+              center.xz += (uHover.xz-center.xz) * attraction * .075;
+              center.y += attraction * 1.35 + wave * 1.1 - (1.0-assembly) * 14.0;
+              float tilt = attraction * .17 + wave * .09;
+              float c = cos(angle), s = sin(angle);
+              mat3 rotation = mat3(s, 0.0, -c, 0.0, 1.0, 0.0, c, 0.0, s);
+              mat3 tip = mat3(1.0, 0.0, 0.0, 0.0, cos(tilt), sin(tilt), 0.0, -sin(tilt), cos(tilt));
+              vec3 size = vec3(radius * .049087 * .89, max(.18, height), .49);
+              vec3 p = rotation * tip * (position * size * max(.01, assembly)) + center;
+              vNormal = normalize(rotation * tip * (normal / size));
+              vWorld = p;
+              vTone = mod(sector + floor(row / 7.0), 5.0);
+              float cue = exp(-pow((uStage - 1.65) * 3.4, 2.0)) + exp(-pow((uStage - 3.0) * 3.0, 2.0));
+              vAccent = step(11.0, mod(row + sector * 2.0 + uDay * 3.0, 13.0));
+              vAccent *= max(cue, (1.0-smoothstep(.0, .6, uStage)) * .85);
+              vRim = wave * .7 + attraction * .15;
+              vec4 mvPosition = viewMatrix * vec4(p, 1.0);
+              vDepth = -mvPosition.z;
+              gl_Position = projectionMatrix * mvPosition;
+            }`,
+          fragmentShader: `
+            uniform vec3 uPaper, uInk, uSage, uOrange;
+            uniform float uStage;
+            varying vec3 vNormal, vWorld;
+            varying float vTone, vRim, vDepth, vAccent;
+            void main() {
+              vec3 n = normalize(vNormal);
+              vec3 eye = normalize(cameraPosition - vWorld);
+              float light = max(dot(n, normalize(vec3(-.5, 1.0, .65))), 0.0);
+              float fresnel = pow(1.0-max(dot(n, eye), 0.0), 3.0);
+              vec3 color = mix(uPaper, uSage, step(2.5, vTone) * .76);
+              color = mix(color, uInk, step(3.5, vTone) * .91);
+              float sageCue = exp(-pow((uStage - 4.65) * 2.8, 2.0));
+              color = mix(color, uSage, sageCue * .55);
+              color = mix(color, uOrange, vAccent * .93);
+              float occlusion = mix(.63, 1.0, smoothstep(0.0, 4.0, vWorld.y));
+              color *= (.48 + light * .67) * occlusion;
+              color += uPaper * fresnel * .13 + uOrange * vAccent * .09 + uSage * (vRim + sageCue * .04);
+              float fog = smoothstep(75.0, 135.0, vDepth) * .4;
+              color = mix(color, uPaper, fog);
+              float grain = fract(sin(dot(gl_FragCoord.xy, vec2(12.9898,78.233))) * 43758.5453)-.5;
+              color += grain * .016;
+              gl_FragColor = vec4(color, 1.0);
+              #include <tonemapping_fragment>
+              #include <colorspace_fragment>
+            }`
+        });
+        const lattice = new THREE.InstancedMesh(geometry, material, count);
+        lattice.frustumCulled = false;
+        scene.add(lattice);
+        world.append(canvas);
+        root.classList.remove('is-flat');
+        root.classList.add('is-3d');
+        progress(60);
+
+        const events = new AbortController();
+        const signal = events.signal;
+        const sections = Array.from(document.querySelectorAll('main > section'));
+        const stops = new Float64Array(sections.length);
+        const railLinks = document.querySelectorAll('.rail-links a');
+        const rail = document.querySelector('.rail-line');
+        const chapter = document.getElementById('chapter-label');
+        const labels = ['00 / The space between', '01 / Out of sync', '02 / A larger whole', '03 / Possibilities shift', '04 / Designed to coexist', '05 / Its next life'];
+        const header = document.querySelector('.site-header');
+        const keys = new Float32Array([
+          31, 32, 38, 0, 0,
+          24, 15, 33, 2, .12,
+          8, 43, 32, 0, 1,
+          -25, 22, 34, 0, .65,
+          -32, 15, 26, 1, .05,
+          -15, 40, 40, 0, .85
+        ]);
+        const pointer = new THREE.Vector2();
+        const raycaster = new THREE.Raycaster();
+        const ground = new THREE.Plane(new THREE.Vector3(0, 1, 0), -1);
+        const hit = new THREE.Vector3();
+        const look = new THREE.Vector3();
+        let frame = 0, previous = performance.now(), began = previous, pulseAt = -10000;
+        let pointerX = 0, pointerY = 0, parallaxX = 0, parallaxY = 0, hover = 0;
+        let magnet = 0, day = 0, targetDay = 0, activeChapter = -1, dirty = true;
+        let current = scrollY, target = current, written = current, maxScroll = 0;
+        let lastInput = 0, scrolling = false, snapping = false, touching = false;
+        let headerHeight = 84, viewportWidth = innerWidth, viewportHeight = innerHeight;
+        let lastStage = -1, lastIntro = -1, lastProgress = -1;
+
+        function measure() {
+          headerHeight = header.offsetHeight;
+          maxScroll = Math.max(0, root.scrollHeight - innerHeight);
+          for (let i = 0; i < stops.length; i++) stops[i] = i ? Math.min(maxScroll, sections[i].getBoundingClientRect().top + scrollY - headerHeight - 20) : 0;
+          target = Math.min(target, maxScroll);
+          dirty = true;
+        }
+        function resize() {
+          viewportWidth = innerWidth;
+          viewportHeight = innerHeight;
+          renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+          renderer.setSize(viewportWidth, viewportHeight);
+          camera.aspect = viewportWidth / viewportHeight;
+          camera.setViewOffset(viewportWidth, viewportHeight, viewportWidth < 761 ? 0 : -viewportWidth * .235, viewportWidth < 761 ? -viewportHeight * .24 : -viewportHeight * .01, viewportWidth, viewportHeight);
+          camera.updateProjectionMatrix();
+          measure();
+        }
+        function goTo(y) {
+          target = Math.max(0, Math.min(maxScroll, y));
+          current = scrollY;
+          scrolling = true;
+          snapping = true;
+          lastInput = performance.now();
+        }
+        // Native scroll owns touch, keyboard, focus, history, and assistive technology.
+        window.addEventListener('wheel', event => {
+          if (event.ctrlKey || event.target.closest('select,textarea,input,[contenteditable]') || Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
+          event.preventDefault();
+          const delta = event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? viewportHeight : 1);
+          if (!scrolling) current = target = scrollY;
+          target = Math.max(0, Math.min(maxScroll, target + delta));
+          scrolling = true;
+          snapping = false;
+          lastInput = performance.now();
+        }, { passive: false, signal });
+        window.addEventListener('scroll', () => {
+          if (Math.abs(scrollY - written) > 1) {
+            current = target = scrollY;
+            scrolling = false;
+            snapping = false;
+            lastInput = performance.now();
+          }
+          dirty = true;
+        }, { passive: true, signal });
+        window.addEventListener('touchstart', () => { touching = true; scrolling = false; }, { passive: true, signal });
+        window.addEventListener('touchend', () => { touching = false; lastInput = performance.now(); }, { passive: true, signal });
+        window.addEventListener('keydown', event => {
+          if (/^(ArrowDown|ArrowUp|PageDown|PageUp|Home|End| )$/.test(event.key)) { scrolling = false; snapping = false; }
+        }, { signal });
+        document.addEventListener('click', event => {
+          const anchor = event.target.closest('a[href^="#"]');
+          if (!anchor || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+          const destination = document.getElementById(anchor.hash.slice(1));
+          if (!destination) return;
+          event.preventDefault();
+          history.pushState(null, '', anchor.hash);
+          goTo(destination.id === 'top' ? 0 : destination.getBoundingClientRect().top + scrollY - headerHeight - 20);
+          if (!destination.hasAttribute('tabindex')) {
+            destination.setAttribute('tabindex', '-1');
+            destination.addEventListener('blur', () => destination.removeAttribute('tabindex'), { once: true });
+          }
+          destination.focus({ preventScroll: true });
+        }, { signal });
+        function followHash() {
+          const destination = document.getElementById(location.hash.slice(1));
+          if (destination) goTo(destination.id === 'top' ? 0 : destination.getBoundingClientRect().top + scrollY - headerHeight - 20);
+        }
+        window.addEventListener('hashchange', followHash, { signal });
+        window.addEventListener('popstate', () => {
+          scrolling = false;
+          snapping = true;
+          current = target = scrollY;
+        }, { signal });
+        window.addEventListener('pointermove', event => {
+          if (event.pointerType === 'touch') return;
+          pointer.x = event.clientX / viewportWidth * 2 - 1;
+          pointer.y = 1 - event.clientY / viewportHeight * 2;
+          pointerX = pointer.x;
+          pointerY = pointer.y;
+          hover = event.target.closest('a,button,input,select') ? 0 : 1;
+        }, { passive: true, signal });
+        document.addEventListener('pointerleave', () => { hover = 0; pointerX = pointerY = 0; }, { signal });
+        window.addEventListener('pointerdown', event => {
+          if (event.button !== 0 || event.target.closest('a,button,input,select,label')) return;
+          pointer.set(event.clientX / viewportWidth * 2 - 1, 1 - event.clientY / viewportHeight * 2);
+          raycaster.setFromCamera(pointer, camera);
+          if (raycaster.ray.intersectPlane(ground, hit)) {
+            uniforms.uPulse.value.copy(hit);
+            pulseAt = performance.now();
+            dirty = true;
+          }
+        }, { passive: true, signal });
+        document.querySelector('.time-controls').addEventListener('click', event => {
+          const button = event.target.closest('.time-button');
+          if (button) targetDay = button.dataset.time === 'morning' ? 0 : button.dataset.time === 'afternoon' ? 1 : 2;
+        }, { signal });
+        window.addEventListener('resize', resize, { passive: true, signal });
+        canvas.addEventListener('webglcontextlost', event => { event.preventDefault(); flat('context-lost'); }, { signal });
+        const observer = new ResizeObserver(measure);
+        observer.observe(document.querySelector('main'));
+        observer.observe(header);
+        document.fonts.ready.then(() => { if (ticket === generation) { measure(); if (location.hash) followHash(); } });
+
+        dispose = () => {
+          cancelAnimationFrame(frame);
+          events.abort();
+          observer.disconnect();
+          geometry.dispose();
+          material.dispose();
+          lattice.dispose();
+          renderer.dispose();
+          renderer.forceContextLoss();
+        };
+        resize();
+        camera.position.set(31, 32, 38);
+        camera.lookAt(0, 0, 0);
+        renderer.compile(scene, camera);
+        progress(85);
+        renderer.render(scene, camera);
+        if (shaderFailed) { clearTimeout(timeout); return flat('shader-unavailable'); }
+        clearTimeout(timeout);
+        progress(100);
+        root.dataset.experience = 'webgl';
+        root.dataset.tiles = String(count);
+        toggle.textContent = 'Motion on ↗';
+        toggle.setAttribute('aria-pressed', 'true');
+        arrival.classList.add('leaving');
+        setTimeout(() => { if (ticket === generation) arrival.hidden = true; }, 600);
+        began = performance.now();
+        if (location.hash) followHash();
+
+        function animate(now) {
+          frame = requestAnimationFrame(animate);
+          const dt = Math.min((now - previous) / 1000, .25);
+          previous = now;
+          if (document.hidden) return;
+          const damping = 1 - Math.exp(-dt * 9);
+          if (scrolling) {
+            current += (target - current) * (1 - Math.exp(-dt * (snapping ? 11 : 13)));
+            if (Math.abs(target - current) < .4) { current = target; scrolling = false; }
+            written = Math.round(current);
+            window.scrollTo(0, written);
+          } else current = scrollY;
+          // Proximity attraction never skips content in sections taller than a viewport.
+          if (!touching && !snapping && now-lastInput > 220 && now-lastInput < 1400 && Math.abs(target-current) < 3 && !document.activeElement.closest('input,select,textarea,button')) {
+            let nearest = -1, distance = Math.min(110, viewportHeight * .13);
+            for (let i = 0; i < stops.length; i++) {
+              const gap = Math.abs(current-stops[i]);
+              if (gap < distance) { distance = gap; nearest = i; }
+            }
+            if (nearest >= 0 && distance > 1) goTo(stops[nearest]);
+          }
+          let index = 0;
+          while (index < stops.length-2 && current >= stops[index+1]) index++;
+          const fraction = Math.max(0, Math.min(1, (current-stops[index]) / Math.max(1, stops[index+1]-stops[index])));
+          const eased = fraction * fraction * (3-2*fraction);
+          const stage = index + eased;
+          const intro = Math.min(1, (now-began) / 1900);
+          const introEase = 1-Math.pow(1-intro, 3);
+          const oldX = parallaxX, oldY = parallaxY, oldMagnet = magnet, oldDay = day;
+          parallaxX += (pointerX-parallaxX) * damping;
+          parallaxY += (pointerY-parallaxY) * damping;
+          magnet += (hover-magnet) * damping;
+          day += (targetDay-day) * damping;
+          const pulseAge = (now-pulseAt) / 1000;
+          const moving = Math.abs(parallaxX-oldX)+Math.abs(parallaxY-oldY)+Math.abs(magnet-oldMagnet)+Math.abs(day-oldDay) > .00005;
+          if (dirty || moving || intro !== lastIntro || Math.abs(stage-lastStage) > .00001 || pulseAge < 1.6) {
+            const a = index*5, b = (index+1)*5;
+            const mobile = viewportWidth < 761;
+            const distance = mobile ? 1.42 : 1;
+            camera.position.set(
+              (keys[a]+(keys[b]-keys[a])*eased) * distance + parallaxX * .65,
+              (keys[a+1]+(keys[b+1]-keys[a+1])*eased) * distance + (1-introEase)*12 + parallaxY * .45,
+              (keys[a+2]+(keys[b+2]-keys[a+2])*eased) * distance + (1-introEase)*18
+            );
+            look.set(0, keys[a+3]+(keys[b+3]-keys[a+3])*eased, 0);
+            camera.lookAt(look);
+            camera.updateMatrixWorld();
+            raycaster.setFromCamera(pointer, camera);
+            if (raycaster.ray.intersectPlane(ground, hit)) uniforms.uHover.value.copy(hit);
+            uniforms.uMagnet.value = magnet;
+            uniforms.uPulseAge.value = Math.min(pulseAge, 2);
+            uniforms.uIntro.value = introEase;
+            uniforms.uOpen.value = keys[a+4]+(keys[b+4]-keys[a+4])*eased;
+            uniforms.uStage.value = stage;
+            uniforms.uDay.value = day;
+            renderer.render(scene, camera);
+            lastIntro = intro;
+            lastStage = stage;
+            dirty = false;
+          }
+          const chapterIndex = Math.min(5, Math.floor(stage+.2));
+          if (chapterIndex !== activeChapter) {
+            activeChapter = chapterIndex;
+            chapter.textContent = labels[chapterIndex];
+            for (let i = 0; i < railLinks.length; i++) {
+              if (i === chapterIndex) railLinks[i].setAttribute('aria-current', 'step');
+              else railLinks[i].removeAttribute('aria-current');
+            }
+          }
+          const pageProgress = Math.round(current / Math.max(1, maxScroll) * 1000) / 1000;
+          if (pageProgress !== lastProgress) { rail.style.setProperty('--progress', pageProgress); lastProgress = pageProgress; }
+        }
+        frame = requestAnimationFrame(animate);
+      } catch {
+        clearTimeout(timeout);
+        if (ticket === generation) flat('unavailable');
+      }
+    }
+    toggle.addEventListener('click', () => enabled ? flat('motion-disabled') : start());
+    reduced.addEventListener('change', () => reduced.matches ? flat('reduced-motion') : start());
+    if (reduced.matches) flat('reduced-motion');
+    else start();
+  </script>
+</body>
+</html>
