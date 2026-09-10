@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#eeeae1">
+  <meta name="description" content="INTERVAL turns the unused hours in existing buildings into a neighborhood space commons. More room for life. No new buildings.">
+  <title>INTERVAL — More room. Same city.</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=Space+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+    :root{--paper:#eeeae1;--ink:#232720;--muted:#616359;--line:#c7c7bb;--orange:#e34a28;--sage:#b5bfa7;--white:#f8f5ee;--mono:'IBM Plex Mono',monospace;--sans:'Space Grotesk',sans-serif}
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth;scroll-padding-top:94px}
+    body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+    ::selection{background:var(--orange);color:var(--white)}
+    a{color:inherit;text-decoration:none}
+    button,input,select{font:inherit}
+    button,a,input,select{-webkit-tap-highlight-color:transparent}
+    button{cursor:pointer}
+    button:disabled{cursor:default}
+    a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--orange);outline-offset:5px}
+    .skip{position:fixed;top:-100px;left:24px;z-index:100;background:var(--ink);color:var(--white);padding:15px}
+    .skip:focus{top:10px}
+    .wrap{width:calc(100% - 112px);max-width:1440px;margin:auto}
+    .mono{font:400 11px/1.5 var(--mono);letter-spacing:.06em;text-transform:uppercase}
+    .site-header{position:sticky;top:0;z-index:20;background:var(--paper);border-bottom:1px solid var(--line)}
+    .header-inner{height:83px;display:flex;align-items:center;justify-content:space-between;gap:32px}
+    .brand{display:inline-flex;align-items:center;gap:12px;font-size:27px;letter-spacing:-1.5px;font-weight:700}
+    .brand-mark{display:flex;gap:3px;width:24px;height:25px}
+    .brand-mark i{display:block;width:6px;background:var(--ink)}
+    .brand-mark i:nth-child(2){height:16px;align-self:flex-end}
+    .brand-mark i:nth-child(3){height:9px;align-self:flex-end}
+    .header-caption{margin-right:auto;margin-left:39px;max-width:135px;font-size:9px;line-height:1.5}
+    nav{display:flex;gap:32px;align-items:center;font-size:12px}
+    nav>a:not(.nav-cta){position:relative;padding:12px 0}
+    nav>a:not(.nav-cta)::after{content:'';position:absolute;bottom:5px;left:0;right:100%;height:1px;background:var(--ink);transition:right .16s}
+    nav>a:hover::after{right:0}
+    .nav-cta{border:1px solid var(--ink);padding:12px 17px;display:flex;gap:27px;align-items:center;transition:background .15s,color .15s}
+    .nav-cta:hover{background:var(--ink);color:var(--paper)}
+    .hero{padding-top:34px}
+    .section-top{display:flex;align-items:center;justify-content:space-between;gap:20px}
+    .signal{display:inline-flex;align-items:center;gap:9px}
+    .signal::before{content:'';width:7px;height:7px;background:var(--orange);display:block}
+    .hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:50px;align-items:center;margin:47px 0 43px}
+    h1,h2,h3,p{margin:0}
+    h1{font-size:clamp(62px,6.7vw,106px);font-weight:500;line-height:.99;letter-spacing:-.07em;margin:0 0 29px}
+    h1 span{color:var(--orange)}
+    .hero-copy>p{max-width:350px;font-size:16px;line-height:1.65;color:var(--muted)}
+    .button{display:inline-flex;justify-content:space-between;align-items:center;gap:40px;background:var(--ink);color:var(--white);padding:18px 21px;border:1px solid var(--ink);font-size:13px;line-height:1.3;transition:background .15s,transform .15s}
+    .button:hover{background:#41473a;transform:translateY(-2px)}
+    .button:active{transform:translateY(0)}
+    .hero-copy .button{margin-top:32px}
+    .arrow{font-size:20px;line-height:1;font-weight:400}
+    .hero-note{display:block;margin-top:15px;color:var(--muted);font-size:9px}
+    .hero-figure{margin:0;position:relative}
+    .mosaic{aspect-ratio:1;display:grid;grid-template-columns:repeat(4,1fr);background:var(--ink);border:1px solid var(--ink);gap:1px;overflow:hidden}
+    .tile{position:relative;overflow:hidden;aspect-ratio:1;background:var(--orange);--shape:var(--ink)}
+    .tile::before,.tile::after{content:'';position:absolute}
+    .arch::before{width:100%;height:100%;border-radius:50% 50% 0 0;background:var(--shape);top:0;left:0}
+    .arch::after{height:50%;width:50%;background:var(--orange);bottom:0;left:25%;border-radius:50% 50% 0 0}
+    .quarter::before{inset:0;background:var(--shape);border-radius:100% 0 0 0}
+    .circle::before{inset:0;border-radius:50%;background:var(--shape)}
+    .cut::before{inset:0;background:linear-gradient(135deg,var(--shape) 50%,transparent 50%)}
+    .bars::before{inset:0;background:repeating-linear-gradient(90deg,var(--shape) 0,var(--shape) 17%,transparent 17%,transparent 33.33%)}
+    .rings::before{width:200%;height:200%;left:0;top:0;border-radius:50%;background:repeating-radial-gradient(circle at center,var(--shape) 0,var(--shape) 9%,var(--orange) 9%,var(--orange) 18%);transform:translate(-50%,-50%)}
+    .light{background:var(--paper);--shape:var(--orange)}
+    .light.arch::after{background:var(--paper)}
+    .dark{background:var(--ink);--shape:var(--paper)}
+    .sage{background:var(--sage);--shape:var(--ink)}
+    .turn{transform:rotate(180deg)}
+    .right{transform:rotate(90deg)}
+    .mosaic-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:var(--paper);width:27%;aspect-ratio:1;border:1px solid var(--ink);display:flex;flex-direction:column;justify-content:center;align-items:center;gap:10px;text-align:center}
+    .mosaic-center .brand-mark{height:35px;width:35px;gap:5px}
+    .mosaic-center .brand-mark i{width:8px}
+    .mosaic-center .brand-mark i:nth-child(2){height:24px}
+    .mosaic-center .brand-mark i:nth-child(3){height:13px}
+    .mosaic-center .mono{font-size:8px;letter-spacing:.13em}
+    figcaption{display:flex;justify-content:space-between;gap:15px;padding-top:13px;color:var(--muted);font-size:9px!important}
+    .hero-bottom{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:19px 0;display:grid;grid-template-columns:1fr 1fr;gap:50px}
+    .hero-bottom>span:last-child{display:flex;justify-content:space-between;gap:16px}
+    .down{font-size:16px}
+    .principle{padding-top:100px;padding-bottom:95px;display:grid;grid-template-columns:1fr 3fr;gap:44px}
+    .section-index{display:flex;gap:16px;padding-top:8px}
+    .section-index .number{color:var(--orange)}
+    h2{font-size:clamp(35px,4.2vw,62px);font-weight:500;line-height:1.08;letter-spacing:-.055em}
+    .principle h2{max-width:900px}
+    .quiet{color:#85897c}
+    .principle-detail{display:grid;grid-template-columns:1fr 1fr;gap:55px;margin-top:31px}
+    .body-copy{font-size:15px;line-height:1.75;color:var(--muted)}
+    .principle-rule{border-left:2px solid var(--orange);padding-left:19px;align-self:start;font-size:13px;line-height:1.7;max-width:310px}
+    .method{border-top:1px solid var(--ink);padding-top:22px}
+    .method-heading{display:flex;justify-content:space-between;align-items:end;gap:24px;margin:37px 0 34px}
+    .method-heading h2{font-size:40px}
+    .method-heading>p{max-width:280px}
+    .steps{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--ink)}
+    .step{padding:28px;border-right:1px solid var(--ink)}
+    .step:last-child{border:0}
+    .step-label{display:flex;justify-content:space-between}
+    .step-art{height:160px;display:flex;align-items:center;justify-content:center;margin:22px 0 25px}
+    .art-one{display:grid;grid-template-columns:repeat(4,29px);gap:6px}
+    .art-one i{width:29px;height:29px;border:1px solid var(--ink);display:block}
+    .art-one i:nth-child(3n){background:var(--ink)}
+    .art-one i:nth-child(6),.art-one i:nth-child(11){background:var(--orange);border-color:var(--orange)}
+    .art-two{width:155px;height:155px;border:1px solid var(--ink);border-radius:50%;position:relative;background:conic-gradient(var(--orange) 0deg 120deg,transparent 120deg 240deg,var(--sage) 240deg 360deg)}
+    .art-two::before{content:'';position:absolute;inset:29px;border-radius:50%;border:1px solid var(--ink);background:var(--paper)}
+    .art-two::after{content:'';position:absolute;left:50%;top:50%;width:63px;height:1px;background:var(--ink);transform:rotate(-30deg);transform-origin:left}
+    .art-three{width:150px;height:150px;display:grid;grid-template-columns:1fr 1fr;gap:4px}
+    .art-three i{background:var(--ink);border-radius:100% 0 0 0}
+    .art-three i:nth-child(2){transform:rotate(90deg);background:var(--orange)}
+    .art-three i:nth-child(3){transform:rotate(-90deg);background:var(--sage)}
+    .art-three i:nth-child(4){transform:rotate(180deg)}
+    .step h3{font-size:24px;font-weight:500;letter-spacing:-.04em;margin-bottom:12px}
+    .step p{font-size:14px;line-height:1.7;color:var(--muted);max-width:310px}
+    .neighborhood{margin-top:105px;padding:55px 0 60px;background:var(--ink);color:var(--paper)}
+    .neighborhood .section-top{color:var(--sage)}
+    .neighborhood-heading{display:flex;justify-content:space-between;gap:60px;margin:44px 0 36px;align-items:flex-end}
+    .neighborhood-heading h2{max-width:600px}
+    .neighborhood-heading .body-copy{max-width:320px;color:#b9bdaf}
+    .schedule-top{border-top:1px solid #59604f;display:flex;align-items:center;justify-content:space-between;padding:22px 0;gap:20px}
+    .time-controls{display:flex;border:1px solid #737a69;padding:4px;gap:4px}
+    .time-button{padding:11px 23px;border:0;color:var(--paper);background:transparent;font:12px var(--mono);transition:background .14s,color .14s;min-height:44px}
+    .time-button:hover{background:#3b4333}
+    .time-button[aria-pressed="true"]{background:var(--paper);color:var(--ink)}
+    .block-map{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+    .space{width:100%;aspect-ratio:1;min-width:0;background:#32392c;border:1px solid #616953;position:relative;overflow:hidden;padding:18px;display:flex;flex-direction:column;justify-content:space-between;transition:background .18s,color .18s}
+    .space.active{background:var(--sage);color:var(--ink);border-color:var(--sage)}
+    .space.active.accent{background:var(--orange);border-color:var(--orange);color:var(--ink)}
+    .space-top,.space-bottom{position:relative;z-index:1}
+    .space-top{display:flex;justify-content:space-between;gap:8px;font-size:9px}
+    .space-bottom h3{font-size:18px;font-weight:500;letter-spacing:-.04em;margin-bottom:5px}
+    .space-bottom p{font-size:11px;line-height:1.5}
+    .space-glyph{position:absolute;width:47%;aspect-ratio:1;left:26.5%;top:22%;opacity:.45;border:1px solid currentColor;border-radius:50% 50% 0 0}
+    .space-glyph::before{content:'';position:absolute;inset:20%;border:1px solid currentColor;border-radius:inherit}
+    .space:nth-child(2) .space-glyph{border-radius:50%}
+    .space:nth-child(3) .space-glyph{border-radius:0;transform:rotate(45deg);width:35%;left:32.5%;top:27%}
+    .space:nth-child(4) .space-glyph{border-radius:100% 0 0 0}
+    .schedule-bottom{display:grid;grid-template-columns:1fr 1fr;gap:40px;border-bottom:1px solid #59604f;padding:22px 0;min-height:91px;align-items:start}
+    .schedule-bottom .body-copy{color:#b9bdaf;font-size:12px}
+    .live-summary{display:flex;align-items:baseline;gap:13px;flex-wrap:wrap}
+    .live-summary strong{font-size:27px;font-weight:500;letter-spacing:-.04em}
+    .live-summary span{color:#c5cbbb;font-size:10px}
+    .system-note{margin-top:20px;color:#b9bdaf;font-size:9px}
+    .compact{padding-top:83px;padding-bottom:83px}
+    .compact h2{max-width:780px}
+    .values{display:flex;gap:28px;margin-top:30px;flex-wrap:wrap}
+    .values span{border-top:1px solid var(--line);padding-top:12px;flex:1;min-width:130px;font-size:10px}
+    .invitation{border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);display:grid;grid-template-columns:1fr 1fr}
+    .invitation-copy{padding:45px 50px 45px 0;display:flex;flex-direction:column;align-items:flex-start}
+    .invitation h2{font-size:clamp(47px,5.2vw,76px);margin:33px 0 22px}
+    .invitation-copy .body-copy{max-width:310px}
+    .end-symbol{display:flex;margin-top:40px;width:135px;height:45px}
+    .end-symbol i{width:45px;height:45px;background:var(--orange);border-radius:50%}
+    .end-symbol i:nth-child(2){border-radius:50% 0 0 50%}
+    .end-symbol i:nth-child(3){border-radius:0}
+    .planner{padding:45px 0 45px 45px;border-left:1px solid var(--ink)}
+    .planner h3{font-size:21px;font-weight:500;letter-spacing:-.04em;margin-bottom:9px}
+    .planner-intro{font-size:13px;line-height:1.6;color:var(--muted);margin-bottom:27px}
+    .field{display:block;margin-bottom:22px}
+    .field>span{display:block;margin-bottom:10px;font-size:10px}
+    select{display:block;width:100%;border:1px solid var(--line);border-radius:0;background:transparent;color:var(--ink);padding:14px 12px;font-size:14px;min-height:48px}
+    .planner .button{width:100%;margin-top:3px}
+    .privacy-note{font-size:9px;color:var(--muted);line-height:1.6;margin-top:13px}
+    .plan-result{margin-top:23px;padding:20px;background:var(--sage);border:1px solid var(--ink)}
+    .plan-result[hidden]{display:none}
+    .plan-result h4{font-size:20px;font-weight:500;letter-spacing:-.04em;margin:8px 0 10px}
+    .plan-result p{font-size:13px;line-height:1.6}
+    .download{margin-top:17px;padding:0 0 6px;background:none;border:0;border-bottom:1px solid var(--ink);font-size:12px;color:var(--ink);min-height:32px}
+    footer{padding:28px 0 32px}
+    .footer-top{display:flex;align-items:center;justify-content:space-between;gap:25px}
+    .footer-top .brand{font-size:22px}
+    .footer-bottom{display:flex;justify-content:space-between;gap:24px;margin-top:25px;color:var(--muted);font-size:9px}
+    .back-top{display:flex;align-items:center;gap:18px;min-height:44px}
+    @media(min-width:1600px){.hero-grid{gap:80px}.hero-copy>p{font-size:18px;max-width:400px}}
+    @media(max-width:1050px){.wrap{width:calc(100% - 64px)}.header-caption{display:none}.hero-grid{gap:30px}h1{font-size:clamp(57px,7.1vw,76px)}.hero-copy>p{font-size:14px}.hero-bottom{gap:30px}.principle{grid-template-columns:1fr 3fr;gap:25px}.step{padding:22px}.space{padding:13px}.space-bottom h3{font-size:16px}.space-glyph{top:20%}.neighborhood-heading h2{font-size:43px}.neighborhood-heading{gap:30px}.invitation-copy{padding-right:30px}.planner{padding-left:30px}.space-bottom p{font-size:10px}}
+    @media(max-width:760px){html{scroll-padding-top:80px}.wrap{width:calc(100% - 40px)}.header-inner{height:70px;gap:15px}.brand{font-size:23px}nav{gap:16px}nav>a:not(.nav-cta){display:none}.nav-cta{padding:10px 12px;gap:14px;font-size:11px}.hero{padding-top:25px}.section-top{font-size:9px}.hero .section-top>span:last-child{font-size:8px}.hero-grid{grid-template-columns:1fr;gap:36px;margin-top:38px;margin-bottom:30px}h1{font-size:clamp(65px,11.5vw,88px);max-width:600px}.hero-copy>p{max-width:370px;font-size:15px}.hero-copy .button{margin-top:24px}.hero-note{font-size:8px}.hero-figure{max-width:560px;width:100%;justify-self:center}.hero-bottom{grid-template-columns:1fr;gap:13px;padding:17px 0;font-size:9px}.hero-bottom>span:last-child{border-top:1px solid var(--line);padding-top:13px}.principle{grid-template-columns:1fr;gap:25px;padding-top:65px;padding-bottom:60px}.principle-detail{gap:25px}.principle h2{font-size:38px}.body-copy{font-size:14px}.principle-rule{font-size:12px}.method-heading{align-items:start;flex-direction:column;margin-top:28px;gap:17px}.method-heading h2{font-size:36px}.method-heading>p{max-width:360px}.steps{grid-template-columns:1fr}.step{display:grid;grid-template-columns:100px 1fr;gap:0 22px;padding:24px;border-right:0;border-bottom:1px solid var(--ink)}.step-label{grid-column:1/-1;margin-bottom:20px}.step-art{grid-row:2/4;margin:0;height:120px;transform:scale(.64);transform-origin:center}.step h3{font-size:24px;align-self:end;margin-bottom:9px}.step p{font-size:13px}.neighborhood{margin-top:65px;padding:35px 0}.neighborhood-heading{flex-direction:column;align-items:start;gap:22px;margin:32px 0}.neighborhood-heading h2{font-size:40px}.neighborhood-heading .body-copy{max-width:420px}.schedule-top{align-items:start;flex-direction:column;gap:18px}.time-controls{width:100%}.time-button{flex:1;padding:12px 10px}.block-map{grid-template-columns:1fr 1fr;gap:8px}.space{padding:14px;min-height:190px}.space-bottom h3{font-size:18px}.space-bottom p{font-size:11px}.space-top{font-size:8px}.schedule-bottom{grid-template-columns:1fr;gap:10px}.system-note{font-size:8px;line-height:1.7}.compact h2{font-size:36px}.values{gap:16px}.invitation{grid-template-columns:1fr}.invitation-copy{padding:33px 0}.invitation h2{font-size:61px;margin-top:25px}.end-symbol{margin-top:25px}.planner{border-left:0;border-top:1px solid var(--ink);padding:30px 0}.footer-top>.mono{display:none}.footer-bottom{flex-direction:column;gap:10px;font-size:8px}}
+    @media(max-width:380px){.wrap{width:calc(100% - 32px)}h1{font-size:59px}.principle-detail{grid-template-columns:1fr}.space{padding:10px;min-height:180px}.space-bottom h3{font-size:16px}.step{padding:20px 14px;grid-template-columns:80px 1fr;gap:0 15px}.step-art{transform:scale(.53)}.section-top{letter-spacing:0}.mosaic-center .mono{font-size:6px}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important}.button:hover{transform:none}}
+  </style>
+</head>
+<body id="top">
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="#top" aria-label="Interval home"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>INTERVAL</a>
+      <span class="header-caption mono">The space between uses.</span>
+      <nav aria-label="Main navigation">
+        <a href="#idea">The idea</a>
+        <a href="#in-motion">In motion</a>
+        <a class="nav-cta" href="#your-interval">Find your interval <span aria-hidden="true">↗</span></a>
+      </nav>
+    </div>
+  </header>
+  <main id="main">
+    <section class="hero wrap" aria-labelledby="hero-title">
+      <div class="section-top mono"><span class="signal">A new commons, hiding in plain sight</span><span>Space × time = possibility</span></div>
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <h1 id="hero-title">More room.<br>Same city.<br><span>Different hours.</span></h1>
+          <p>A quiet restaurant before service. A studio after class. We turn the hours between uses into places for a neighborhood to come together.</p>
+          <a class="button" href="#idea">See the space between <span class="arrow" aria-hidden="true">↘</span></a>
+          <span class="hero-note mono">No new buildings. A new way to belong.</span>
+        </div>
+        <figure class="hero-figure">
+          <div class="mosaic" role="img" aria-label="Sixteen geometric modules tessellate into a shared courtyard, representing different spaces joined by time.">
+            <div class="tile arch"></div><div class="tile quarter light turn"></div><div class="tile circle"></div><div class="tile rings"></div>
+            <div class="tile quarter dark"></div><div class="tile cut"></div><div class="tile arch light turn"></div><div class="tile quarter turn"></div>
+            <div class="tile arch light"></div><div class="tile circle sage"></div><div class="tile quarter"></div><div class="tile arch right"></div>
+            <div class="tile rings turn"></div><div class="tile quarter turn"></div><div class="tile bars light"></div><div class="tile circle dark"></div>
+          </div>
+          <div class="mosaic-center" aria-hidden="true"><span class="brand-mark"><i></i><i></i><i></i></span><span class="mono">Separate spaces.<br>Shared possibility.</span></div>
+          <figcaption class="mono"><span>Fig. 01 — The neighborhood, recomposed</span><span>16 parts / one whole</span></figcaption>
+        </figure>
+      </div>
+      <div class="hero-bottom mono"><span>An operating system for the hours we overlook.</span><span><span>Built around what is already here.</span><a href="#idea" aria-label="Scroll to the idea"><span class="down" aria-hidden="true">↓</span></a></span></div>
+    </section>
+
+    <section class="principle wrap" id="idea" aria-labelledby="idea-title">
+      <div class="section-index mono"><span class="number">01 /</span><span>The overlooked resource</span></div>
+      <div>
+        <h2 id="idea-title">The city isn’t out of space.<br><span class="quiet">Its spaces are out of sync.</span></h2>
+        <div class="principle-detail">
+          <p class="body-copy">Every neighborhood has two maps. The one of its buildings. And the invisible one of when they’re empty. INTERVAL brings them together, making a shared place from the gaps.</p>
+          <p class="principle-rule">Not another space to rent.<br>A local commons to contribute to.<br>Give hours. Get possibility back.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="method wrap" aria-labelledby="method-title">
+      <div class="section-top mono"><span>02 / A simple spatial equation</span><span>Less building. More connecting.</span></div>
+      <div class="method-heading"><h2 id="method-title">Small intervals. A larger whole.</h2><p class="body-copy">A reciprocal network, measured in useful hours rather than square meters.</p></div>
+      <div class="steps">
+        <article class="step">
+          <div class="step-label mono"><span>01 — Reveal</span><span>↗</span></div>
+          <div class="step-art" aria-hidden="true"><div class="art-one"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+          <h3>Find the quiet hours.</h3><p>Hosts mark when a space sits unused, what it can support, and what must stay exactly as it is.</p>
+        </article>
+        <article class="step">
+          <div class="step-label mono"><span>02 — Align</span><span>↗</span></div>
+          <div class="step-art" aria-hidden="true"><div class="art-two"></div></div>
+          <h3>Give every hour a fit.</h3><p>Match a neighborhood need to a compatible space. Leave room for arrival, reset, and the life already there.</p>
+        </article>
+        <article class="step">
+          <div class="step-label mono"><span>03 — Multiply</span><span>↗</span></div>
+          <div class="step-art" aria-hidden="true"><div class="art-three"><i></i><i></i><i></i><i></i></div></div>
+          <h3>Make sharing reciprocal.</h3><p>Contributed hours earn access to other spaces. A single spare room becomes part of a whole neighborhood.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="neighborhood" id="in-motion" aria-labelledby="motion-title">
+      <div class="wrap">
+        <div class="section-top mono"><span>03 / The same block, three ways</span><span class="signal">An illustrative day</span></div>
+        <div class="neighborhood-heading"><h2 id="motion-title">The buildings stay.<br>The possibilities shift.</h2><p class="body-copy">Move through a day. Watch private spaces open into a shared neighborhood, then return to their everyday lives.</p></div>
+        <div class="schedule-top"><span class="mono">One neighborhood / four participating spaces</span><div class="time-controls" role="group" aria-label="Choose a time of day"><button class="time-button" type="button" data-time="morning" aria-pressed="true" aria-controls="block-map schedule-status">08:00</button><button class="time-button" type="button" data-time="afternoon" aria-pressed="false" aria-controls="block-map schedule-status">13:00</button><button class="time-button" type="button" data-time="evening" aria-pressed="false" aria-controls="block-map schedule-status">18:00</button></div></div>
+        <div class="block-map" id="block-map">
+          <article class="space active accent"><div class="space-top mono"><span>01 / Restaurant</span><span class="space-state">Open to share</span></div><div class="space-glyph" aria-hidden="true"></div><div class="space-bottom"><h3>The morning table</h3><p>Quiet coworking · 08:00–11:00</p></div></article>
+          <article class="space"><div class="space-top mono"><span>02 / Movement studio</span><span class="space-state">Everyday use</span></div><div class="space-glyph" aria-hidden="true"></div><div class="space-bottom"><h3>In its own rhythm</h3><p>Morning classes · with the host</p></div></article>
+          <article class="space active"><div class="space-top mono"><span>03 / Workshop</span><span class="space-state">Open to share</span></div><div class="space-glyph" aria-hidden="true"></div><div class="space-bottom"><h3>Room to repair</h3><p>Community mending · 08:00–10:00</p></div></article>
+          <article class="space"><div class="space-top mono"><span>04 / Office</span><span class="space-state">Everyday use</span></div><div class="space-glyph" aria-hidden="true"></div><div class="space-bottom"><h3>A working day</h3><p>Team workspace · with the host</p></div></article>
+        </div>
+        <div class="schedule-bottom" id="schedule-status" aria-live="polite" aria-atomic="true"><div class="live-summary"><strong id="open-count">2 spaces open</strong><span class="mono" id="shared-hours">5 shared space-hours</span></div><p class="body-copy" id="time-story">Before the first lunch order, a table becomes a desk. Down the street, a workbench becomes a meeting point.</p></div>
+        <p class="system-note mono">Model neighborhood, not live availability. Shared hours are the sum of the illustrated opening windows.</p>
+      </div>
+    </section>
+
+    <section class="principle compact wrap" aria-labelledby="care-title">
+      <div class="section-index mono"><span class="number">04 /</span><span>Designed to coexist</span></div>
+      <div><h2 id="care-title">A commons, not a free-for-all.<br><span class="quiet">The boundaries make it work.</span></h2><div class="principle-detail"><p class="body-copy">A space is someone’s livelihood before it’s anyone’s possibility. Hosts set the boundaries. Every proposed match needs an agreed use, a named steward, and a clear handover.</p><p class="body-copy">Access, accessibility, insurance, and reset time are checked before a space opens. Sharing should add to a neighborhood, not ask it to absorb the cost.</p></div><div class="values mono"><span>01 / Host-led rules</span><span>02 / Supported access</span><span>03 / Leave it ready</span></div></div>
+    </section>
+
+    <section class="invitation wrap" id="your-interval" aria-labelledby="invitation-title">
+      <div class="invitation-copy"><span class="signal mono">05 / Start with what you have</span><h2 id="invitation-title">Your space.<br>Its next life.</h2><p class="body-copy">You don’t need a new building.<br>Just a few hours worth opening.<br>See what your interval could become.</p><div class="end-symbol" aria-hidden="true"><i></i><i></i><i></i></div></div>
+      <div class="planner">
+        <h3>Find your first interval.</h3><p class="planner-intro">A small thought experiment. A practical starting point.</p>
+        <form id="interval-form">
+          <label class="field" for="space-type"><span class="mono">01 / What kind of space do you have?</span><select id="space-type" name="space"><option value="restaurant">A restaurant or café</option><option value="studio">A movement or creative studio</option><option value="workshop">A workshop or makerspace</option><option value="office">An office or meeting room</option></select></label>
+          <label class="field" for="free-time"><span class="mono">02 / When does it go quiet?</span><select id="free-time" name="time"><option value="morning">Mornings · 08:00–12:00</option><option value="afternoon">Afternoons · 13:00–17:00</option><option value="evening">Evenings · 18:00–22:00</option></select></label>
+          <button class="button" type="submit">Reveal my interval <span class="arrow" aria-hidden="true">↗</span></button>
+          <p class="privacy-note mono">No signup. Nothing sent or stored. This is a concept planner, not a booking.</p>
+        </form>
+        <div class="plan-result" id="plan-result" role="status" aria-live="polite" aria-atomic="true" hidden></div>
+        <button class="download" type="button" id="download-plan" hidden>Download your starting brief <span aria-hidden="true">↓</span></button>
+      </div>
+    </section>
+  </main>
+  <footer class="wrap">
+    <div class="footer-top"><a href="#top" class="brand" aria-label="Interval home"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>INTERVAL</a><span class="mono">More room for life. No new buildings.</span><a href="#top" class="back-top mono">Back to the beginning <span class="arrow" aria-hidden="true">↑</span></a></div>
+    <div class="footer-bottom mono"><span>© 2026 Interval / An independent concept for a shared city.</span><span>Space is finite. Possibility is a matter of arrangement.</span></div>
+  </footer>
+  <script>
+    (() => {
+      'use strict';
+      const schedules = {
+        morning: {
+          hours: 5,
+          story: 'Before the first lunch order, a table becomes a desk. Down the street, a workbench becomes a meeting point.',
+          spaces: [
+            [true, 'The morning table', 'Quiet coworking · 08:00–11:00'],
+            [false, 'In its own rhythm', 'Morning classes · with the host'],
+            [true, 'Room to repair', 'Community mending · 08:00–10:00'],
+            [false, 'A working day', 'Team workspace · with the host']
+          ]
+        },
+        afternoon: {
+          hours: 3,
+          story: 'As lunch service begins, the studio opens its quieter hours. The commons moves without adding a single room.',
+          spaces: [
+            [false, 'Service, as usual', 'Lunch service · with the host'],
+            [true, 'A place to rehearse', 'Neighborhood theatre · 13:00–16:00'],
+            [false, 'Making a living', 'Workshop production · with the host'],
+            [false, 'A working day', 'Team workspace · with the host']
+          ]
+        },
+        evening: {
+          hours: 7,
+          story: 'The working day ends. A meeting room becomes a language circle, while neighbors learn and make a few doors away.',
+          spaces: [
+            [false, 'Service, as usual', 'Dinner service · with the host'],
+            [true, 'Room to slow down', 'Community meditation · 18:00–20:00'],
+            [true, 'Make it together', 'Supervised making · 18:00–21:00'],
+            [true, 'A common language', 'Language exchange · 18:00–20:00']
+          ]
+        }
+      };
+      const timeButtons = [...document.querySelectorAll('.time-button')];
+      const spaces = [...document.querySelectorAll('.space')];
+      timeButtons.forEach(button => button.addEventListener('click', () => {
+        const schedule = schedules[button.dataset.time];
+        timeButtons.forEach(item => item.setAttribute('aria-pressed', String(item === button)));
+        let highlighted = false;
+        schedule.spaces.forEach(([active, title, detail], index) => {
+          const space = spaces[index];
+          space.classList.toggle('active', active);
+          space.classList.toggle('accent', active && !highlighted);
+          if (active) highlighted = true;
+          space.querySelector('.space-state').textContent = active ? 'Open to share' : 'Everyday use';
+          space.querySelector('h3').textContent = title;
+          space.querySelector('.space-bottom p').textContent = detail;
+        });
+        const count = schedule.spaces.filter(space => space[0]).length;
+        document.getElementById('open-count').textContent = `${count} ${count === 1 ? 'space' : 'spaces'} open`;
+        document.getElementById('shared-hours').textContent = `${schedule.hours} shared space-hours`;
+        document.getElementById('time-story').textContent = schedule.story;
+      }));
+
+      const possibilities = {
+        restaurant: { morning: 'A neighborhood worktable.', afternoon: 'A table for shared learning.', evening: 'A supper-time reading circle.', check: 'Agree which tables and facilities are available. Keep food preparation and service areas out of bounds.' },
+        studio: { morning: 'A gentle start, together.', afternoon: 'Room for a first rehearsal.', evening: 'A place to slow down.', check: 'Confirm floor care, sound limits, accessible entry, and the maximum group size with the host.' },
+        workshop: { morning: 'A morning made for mending.', afternoon: 'A neighborhood repair circle.', evening: 'An evening to make together.', check: 'Arrange a qualified steward. Agree tool permissions, safety procedures, and materials before anyone arrives.' },
+        office: { morning: 'A quiet room for big ideas.', afternoon: 'A home for homework help.', evening: 'A common language, after hours.', check: 'Separate shared rooms from private desks and files. Confirm building access and safeguarding needs.' }
+      };
+      const windows = { morning: '08:30–11:30', afternoon: '13:30–16:30', evening: '18:30–21:30' };
+      const form = document.getElementById('interval-form');
+      const result = document.getElementById('plan-result');
+      const download = document.getElementById('download-plan');
+      let brief = '';
+      form.addEventListener('change', () => {
+        result.hidden = true;
+        download.hidden = true;
+        brief = '';
+      });
+      form.addEventListener('submit', event => {
+        event.preventDefault();
+        const type = document.getElementById('space-type');
+        const time = document.getElementById('free-time').value;
+        const possibility = possibilities[type.value];
+        const title = possibility[time];
+        const window = `Proposed shared window: ${windows[time]}. Three useful hours, with 30 minutes on either side for opening and reset.`;
+        const caution = 'A starting idea only. Confirm demand, accessibility, permissions, insurance, and a named steward before opening.';
+        result.replaceChildren();
+        [['span', 'YOUR POSSIBLE INTERVAL', 'mono'], ['h4', title, ''], ['p', window, ''], ['p', possibility.check, '']].forEach(([tag, text, className]) => {
+          const element = document.createElement(tag);
+          element.textContent = text;
+          if (className) element.className = className;
+          result.append(element);
+        });
+        result.hidden = false;
+        download.hidden = false;
+        brief = `INTERVAL / Your starting brief\n\n${type.options[type.selectedIndex].text}\n${title}\n\n${window}\n\nFIRST CHECK\n${possibility.check}\n\nBEFORE OPENING\n${caution}\n\nThis concept planner does not create a booking or enroll you in a service.\n`;
+        result.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'nearest' });
+      });
+      download.addEventListener('click', () => {
+        if (!brief) return;
+        const url = URL.createObjectURL(new Blob([brief], { type: 'text/plain;charset=utf-8' }));
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'my-interval-brief.txt';
+        document.body.append(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      });
+    })();
+  </script>
+</body>
+</html>
